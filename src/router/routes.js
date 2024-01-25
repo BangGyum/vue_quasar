@@ -7,6 +7,8 @@ const routes = [
       { path: 'Typography', component: () => import('pages/Typography.vue') },
       { path: 'Breakpoints', component: () => import('pages/Breakpoints.vue') },
       { path: 'confList', component: () => import('pages/ConfList.vue') },
+      { path: 'confInsert', component: () => import('pages/ConfInsert.vue') },
+      { path: 'confUpdate', component: () => import('pages/ConfUpdate.vue') },
     ],
   },
   {

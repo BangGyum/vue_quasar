@@ -51,16 +51,22 @@ const linksList = [
     to: '/breakpoints',
   },
   {
-    title: 'confList',
+    title: 'ConfList',
     caption: 'quasar.dev',
     icon: 'school',
     to: '/confList',
   },
   {
-    title: 'confInsert',
+    title: 'ConfInsert',
     caption: 'quasar.dev',
     icon: 'school',
     to: '/confInsert',
+  },
+  {
+    title: 'ConfUpdate',
+    caption: 'quasar.dev',
+    icon: 'school',
+    to: '/confUpdate',
   },
 ];
 </script>
