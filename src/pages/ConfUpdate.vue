@@ -83,22 +83,6 @@ axios.post('/api/confObject').then(res => {
   confList.data = res.data;
 });
 
-// const qantom = [
-//   {
-//     name: 'yaho',
-//     age: 1,
-//   },
-//   {
-//     name: 'yahooo',
-//     age: 454,
-//   },
-// ];
-// const idx = 1;
-// axios.post('/api/idx/' + idx, { qantom }).then(res => {
-//   //confObject = res.data
-//   console.log(res.data);
-// });
-
 const $q = useQuasar();
 
 const confId = ref(null);
@@ -107,23 +91,11 @@ const confName = ref(null);
 const confDesc = ref(null);
 const accept = ref(false);
 
-// function onSubmit() {
-//   if (accept.value !== true) {
-//     $q.notify({
-//       color: 'red-5',
-//       textColor: 'white',
-//       icon: 'warning',
-//       message: 'You need to accept the license and terms first',
-//     });
-//   } else {
-//     $q.notify({
-//       color: 'green-4',
-//       textColor: 'white',
-//       icon: 'cloud_done',
-//       message: 'Submitted',
-//     });
-//   }
-// }
+confId.value = null;
+confValue.value = null;
+confName.value = null;
+confDesc.value = null;
+accept.value = false;
 
 function onReset() {
   confId.value = null;
@@ -145,6 +117,16 @@ function onConsoleLog() {
     console.log(res.data);
   });
 }
+const testParam = {
+  //confId: confId.value,
+  //confValue: confValue.value,
+  confId: 'hanwooGender',
+  confValue: 'castration',
+};
+const idxTest = 1;
+axios.post('/api/getConfig/' + idxTest, { testParam }).then(res => {
+  console.log(res.data);
+});
 </script>
 
 <style lang="scss" scoped>
