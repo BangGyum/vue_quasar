@@ -6,6 +6,9 @@ import {
   createWebHashHistory,
 } from 'vue-router';
 import routes from './routes';
+import { createPinia } from 'pinia';
+import App from '../App.vue';
+import { createApp } from 'vue';
 
 /*
  * If not building with SSR mode, you can
@@ -15,6 +18,11 @@ import routes from './routes';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
+const pinia = createPinia();
+const app = createApp(App);
+
+app.use(pinia);
+app.mount('#app');
 
 export default route(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
