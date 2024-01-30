@@ -3,12 +3,13 @@
     <!-- Option 1 -->
     <div>Direct store</div>
     <!-- Read the state value directly -->
-    <div>{{ store.counter }}</div>
+    <div>{{ store.count }}</div>
     <!-- Use getter directly -->
     <div>{{ store.doubleCount }}</div>
+    <div>{{ store.quadrupleCount }}</div>
 
     <!-- Manipulate state directly -->
-    <q-btn @click="store.counter--">-</q-btn>
+    <q-btn @click="store.count--">-</q-btn>
     <!-- Use an action -->
     <q-btn @click="store.increment()">+</q-btn>
   </div>
@@ -36,7 +37,7 @@
     <div>{{ doubleCount }}</div>
 
     <!-- Manipulate state directly-->
-    <q-btn @click="counter--">-</q-btn>
+    <q-btn @click="count--">-</q-btn>
     <!-- Use an action -->
     <q-btn @click="increment()">+</q-btn>
   </div>
@@ -90,10 +91,11 @@ function onConsoleLog() {
 const store = useCounterStore();
 
 // Option 2: use computed and functions to use the store
-const count = computed(() => store.counter);
+const count = computed(() => store.count);
+const quadruple = computed(() => store.quadrupleCount);
 const doubleCountValue = computed(() => store.doubleCount);
 const incrementCount = () => store.increment(); // use action
-const decrementCount = () => store.counter--; // manipulate directly
+const decrementCount = () => store.count--; // manipulate directly
 
 // Option 3: use destructuring to use the store in the template
 const { counter, doubleCount } = storeToRefs(store); // state and getters need "storeToRefs"

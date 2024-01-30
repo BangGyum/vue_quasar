@@ -8,7 +8,7 @@ import {
 import routes from './routes';
 import { createPinia } from 'pinia';
 import App from '../App.vue';
-import { createApp } from 'vue';
+import { createApp, inject } from 'vue';
 
 /*
  * If not building with SSR mode, you can
@@ -40,6 +40,7 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
+  const appProvided = inject('appProvided');
 
   return Router;
 });
