@@ -1,72 +1,4 @@
 <template>
-  <div class="q-pa-md" style="max-width: 400px">
-    <q-form @submit="onConsoleLog" @reset="onReset" class="q-gutter-md">
-      <q-input
-        filled
-        v-model="confId"
-        label="공통코드 ID "
-        hint="confId"
-        lazy-rules
-        :rules="[val => (val && val.length > 0) || 'Please type something']"
-      />
-
-      <q-input
-        filled
-        v-model="confValue"
-        label="공통코드 VALUE "
-        hint="confValue"
-        lazy-rules
-        :rules="[
-          val => !!val || '* Required',
-          val => val.length < 30 || 'Please use maximum 20 character',
-        ]"
-      />
-
-      <q-input
-        filled
-        v-model="confName"
-        label="공통코드 NAME "
-        hint="confName"
-        lazy-rules
-        :rules="[
-          val => !!val || '* Required',
-          val => val.length < 100 || 'Please use maximum 100 character',
-        ]"
-      />
-
-      <q-input
-        filled
-        v-model="confDesc"
-        label="공통코드 설명 "
-        hint="confDesc"
-        lazy-rules
-        :rules="[
-          val => !!val || '* Required',
-          val => val.length < 255 || 'Please use maximum 255 character',
-        ]"
-      />
-
-      <q-toggle v-model="accept" label="I accept the license and terms" />
-
-      <div>
-        <q-btn label="Submit" type="submit" color="primary" />
-        <q-btn
-          label="Reset"
-          type="reset"
-          color="primary"
-          flat
-          class="q-ml-sm"
-        />
-      </div>
-    </q-form>
-  </div>
-  <ul>
-    <li>여기는 [{}] 구조의 reactive</li>
-    <li>{{ confList.value }}</li>
-    <li v-for="(value2, idx) in confList.data" :key="idx">
-      : {{ value2.name }}
-    </li>
-  </ul>
   <div>
     <!-- Option 1 -->
     <div>Direct store</div>
@@ -114,6 +46,9 @@
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 import { useQuasar } from 'quasar';
+import { computed } from 'vue';
+import { useCounterStore } from 'stores/counter';
+import { storeToRefs } from 'pinia';
 
 const confList = reactive({
   data: [],
@@ -151,10 +86,6 @@ function onConsoleLog() {
     console.log(res.data);
   });
 }
-
-import { computed } from 'vue';
-import { useCounterStore } from 'stores/counter';
-import { storeToRefs } from 'pinia';
 
 const store = useCounterStore();
 
