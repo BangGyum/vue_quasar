@@ -8,6 +8,7 @@
       :rows="rows.data"
       :columns="columns"
       row-key="name"
+      @row-dblclick="tableDoubleClick"
     />
   </div>
   <div>
@@ -113,6 +114,11 @@ function onConsoleLog() {
   axios.post('/api/saveConf/' + idx, { param }).then(res => {
     console.log(res.data);
   });
+}
+function tableDoubleClick(evt, row, index) {
+  console.log(evt);
+  console.log(row);
+  console.log(index);
 }
 
 const store = useCounterStore();
