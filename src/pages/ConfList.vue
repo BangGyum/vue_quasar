@@ -1,20 +1,16 @@
 <template>
   <div class="q-pa-md">
     <q-table
-      class="my-sticky-dynamic"
+      style="height: 400px"
       flat
       bordered
       title="Treats"
       :rows="rows"
       :columns="columns"
-      :loading="loading"
       row-key="index"
       virtual-scroll
-      :virtual-scroll-item-size="48"
-      :virtual-scroll-sticky-size-start="48"
-      :pagination="pagination"
+      v-model:pagination="pagination"
       :rows-per-page-options="[0]"
-      @virtual-scroll="onScroll"
     />
   </div>
   <div>
@@ -71,19 +67,27 @@ import { storeToRefs } from 'pinia';
 const confList = reactive({
   data: [],
 });
-
-// axios.post('/api/confList').then(res => {
-//   //confObject = res.data
-//   console.log(res.data);
-//   confList.data = res.data;
-//   console.log(confList.data);
-// });
 axios.get('/api/test').then(res => {
   //confObject = res.data
   console.log(res.data);
   confList.data = res.data;
-  console.log(confList.data);
+  //console.log(confList.data);
+
+  for (let i = 0; i < 1000; i++) {
+    rows = rows.concat(confList.data.slice(0).map(r => ({ ...r })));
+  }
+  rows.forEach((row, index) => {
+    row.index = index;
+  });
+  console.log(rows);
 });
+pagination: ref({
+  rowsPerPage: 1,
+});
+
+// we generate lots of rows here
+let rows = [];
+
 const $q = useQuasar();
 
 const confId = ref(null);
@@ -125,166 +129,58 @@ const decrementCount = () => store.count--; // manipulate directly
 // Option 3: use destructuring to use the store in the template
 const { counter, doubleCount } = storeToRefs(store); // state and getters need "storeToRefs"
 const { increment } = store; // actions can be destructured directly
-
 const columns = [
   {
     name: 'index',
     label: '#',
-    field: 'index'
+    field: 'index',
   },
   {
-    name: 'name',
-    required: true,
-    label: 'Dessert (100g serving)',
+    name: 'CODE_ID',
+    //required: true,
+    label: 'CODE_ID',
     align: 'left',
-    field: row => row.name,
-    format: val => val,
-    sortable: true
+    field: 'CODE_ID', //여기가 컬럼에 값
+    //field: row => row.name,
+    //format: val => `${val}`,
+    sortable: true,
   },
-  { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
-  { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-  { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
-  { name: 'protein', label: 'Protein (g)', field: 'protein' },
-  { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
-  { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-  { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
-]
+  {
+    name: 'CODE_VALUE',
+    align: 'left',
+    label: 'CODE_VALUE',
+    field: 'CODE_VALUE',
+    sortable: true,
+  },
+  {
+    name: 'CODE_NAME',
+    label: 'CODE_NAME ',
+    field: 'CODE_NAME',
+    sortable: true,
+  },
+  { name: 'CODE_DESC', label: 'CODE_DESC ', field: 'CODE_DESC' },
 
-const seed = [
+  { name: 'CREATE_ID', label: 'CREATE_ID ', field: 'CREATE_ID' },
   {
-    name: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6.0,
-    carbs: 24,
-    protein: 4.0,
-    sodium: 87,
-    calcium: '14%',
-    iron: '1%'
+    name: 'UPDATE_DT',
+    label: 'UPDATE_DT',
+    field: 'UPDATE_DT',
+    sortable: true,
+    //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
+  { name: 'CREATE_DT', label: 'CREATE_DT ', align: 'left', field: 'CREATE_DT' },
   {
-    name: 'Ice cream sandwich',
-    calories: 237,
-    fat: 9.0,
-    carbs: 37,
-    protein: 4.3,
-    sodium: 129,
-    calcium: '8%',
-    iron: '1%'
+    name: 'UPDATE_ID',
+    label: 'UPDATE_ID',
+    field: 'UPDATE_ID',
+    sortable: true,
+    //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
-  {
-    name: 'Eclair',
-    calories: 262,
-    fat: 16.0,
-    carbs: 23,
-    protein: 6.0,
-    sodium: 337,
-    calcium: '6%',
-    iron: '7%'
-  },
-  {
-    name: 'Cupcake',
-    calories: 305,
-    fat: 3.7,
-    carbs: 67,
-    protein: 4.3,
-    sodium: 413,
-    calcium: '3%',
-    iron: '8%'
-  },
-  {
-    name: 'Gingerbread',
-    calories: 356,
-    fat: 16.0,
-    carbs: 49,
-    protein: 3.9,
-    sodium: 327,
-    calcium: '7%',
-    iron: '16%'
-  },
-  {
-    name: 'Jelly bean',
-    calories: 375,
-    fat: 0.0,
-    carbs: 94,
-    protein: 0.0,
-    sodium: 50,
-    calcium: '0%',
-    iron: '0%'
-  },
-  {
-    name: 'Lollipop',
-    calories: 392,
-    fat: 0.2,
-    carbs: 98,
-    protein: 0,
-    sodium: 38,
-    calcium: '0%',
-    iron: '2%'
-  },
-  {
-    name: 'Honeycomb',
-    calories: 408,
-    fat: 3.2,
-    carbs: 87,
-    protein: 6.5,
-    sodium: 562,
-    calcium: '0%',
-    iron: '45%'
-  },
-  {
-    name: 'Donut',
-    calories: 452,
-    fat: 25.0,
-    carbs: 51,
-    protein: 4.9,
-    sodium: 326,
-    calcium: '2%',
-    iron: '22%'
-  },
-  {
-    name: 'KitKat',
-    calories: 518,
-    fat: 26.0,
-    carbs: 65,
-    protein: 7,
-    sodium: 54,
-    calcium: '12%',
-    iron: '6%'
-  }
-]
+];
 
-// we generate lots of rows here
-let allRows = []
-for (let i = 0; i < 1000; i++) {
-  allRows = allRows.concat(seed.slice(0).map(r => ({ ...r })))
-}
-allRows.forEach((row, index) => {
-  row.index = index
-})
-
-const pageSize = 50
-const lastPage = Math.ceil(allRows.length / pageSize)
-
-const nextPage = ref(2)
-const loading = ref(false)
-
-const rows = computed(() => allRows.slice(0, pageSize * (nextPage.value - 1)))
-
-onScroll ({ to, ref }) {
-  const lastIndex = rows.value.length - 1
-
-  if (loading.value !== true && nextPage.value < lastPage && to === lastIndex) {
-    loading.value = true
-
-    setTimeout(() => {
-      nextPage.value++
-      nextTick(() => {
-        ref.refresh()
-        loading.value = false
-      })
-    }, 500)
-  }
-}
+pagination: ref({
+  rowsPerPage: 1000,
+});
 </script>
 
 <style lang="scss" scoped>
