@@ -1,16 +1,13 @@
 <template>
   <div class="q-pa-md">
     <q-table
-      style="height: 400px"
+      class="my-sticky-header-table"
       flat
       bordered
       title="Treats"
-      :rows="rows"
+      :rows="rows.data"
       :columns="columns"
-      row-key="index"
-      virtual-scroll
-      v-model:pagination="pagination"
-      :rows-per-page-options="[0]"
+      row-key="name"
     />
   </div>
   <div>
@@ -64,29 +61,30 @@ import { useQuasar } from 'quasar';
 import { useCounterStore } from 'stores/counter';
 import { storeToRefs } from 'pinia';
 
+const rows = reactive({
+  data: [],
+});
 const confList = reactive({
   data: [],
 });
 axios.get('/api/test').then(res => {
   //confObject = res.data
-  console.log(res.data);
+  //console.log(res.data);
   confList.data = res.data;
-  //console.log(confList.data);
+  console.log(confList.data);
 
   for (let i = 0; i < 1000; i++) {
-    rows = rows.concat(confList.data.slice(0).map(r => ({ ...r })));
+    rows.data = rows.data.concat(confList.data.slice(0).map(r => ({ ...r })));
   }
-  rows.forEach((row, index) => {
+  rows.data.forEach((row, index) => {
     row.index = index;
   });
-  console.log(rows);
 });
 pagination: ref({
   rowsPerPage: 1,
 });
 
 // we generate lots of rows here
-let rows = [];
 
 const $q = useQuasar();
 
@@ -182,39 +180,31 @@ pagination: ref({
   rowsPerPage: 1000,
 });
 </script>
-
-<style lang="scss" scoped>
-/*다크모드*/
-body.body--dark {
-  background: #000;
-}
-/*테이블 관련*/
-.my-sticky-dynamic {
+<style lang="sass">
+.my-sticky-header-table
   /* height or max-height is important */
-  height: 410px;
-}
+  height: 400px
 
-.q-table__top,
-.q-table__bottom,
-thead tr:first-child th {
-  /* bg color is important for th; just specify one */
-  background-color: #00b4ff;
-}
-thead tr th {
-  position: sticky;
-  z-index: 1;
-}
-/* this will be the loading indicator */
-thead tr:last-child th {
-  /* height of all previous header rows */
-  top: 48px;
-}
-thead tr:first-child th {
-  top: 0;
-}
-/* prevent scrolling behind sticky top row on focus */
-tbody
-    /* height of all previous header rows */ {
-  scroll-margin-top: 48px;
-}
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th
+    /* bg color is important for th; just specify one */
+    background-color: #ADD8E6
+    color: black
+
+  thead tr th
+    position: sticky
+    z-index: 1
+  thead tr:first-child th
+    top: 0
+
+  /* this is when the loading indicator appears */
+  &.q-table--loading thead tr:last-child th
+    /* height of all previous header rows */
+    top: 48px
+
+  /* prevent scrolling behind sticky top row on focus */
+  tbody
+    /* height of all previous header rows */
+    scroll-margin-top: 48px
 </style>
