@@ -53,6 +53,8 @@
     <!-- Use an action -->
     <q-btn @click="increment()">+</q-btn>
   </div>
+
+  <q-btn to="/confInsert" label="To Docs index" outline color="purple" />
 </template>
 
 <script setup>
@@ -182,9 +184,15 @@ const columns = [
   },
 ];
 
-pagination: ref({
-  rowsPerPage: 1000,
-});
+const linksList = [
+  //여기의 메뉴 목록은 위에 EssenstialLink 컴포넌트로 렌더링되기 때문에 위에서 수정
+  {
+    title: 'Typography',
+    caption: 'quasar.dev',
+    icon: 'school',
+    to: '/typography',
+  },
+];
 </script>
 <style lang="sass">
 .my-sticky-header-table
