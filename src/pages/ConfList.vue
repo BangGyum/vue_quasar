@@ -55,7 +55,7 @@
     <q-btn @click="increment()">+</q-btn>
   </div>
 
-  <q-btn to="/codeInsert" label="To Docs index" outline color="purple" />
+  <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
 </template>
 
 <script setup>
@@ -147,6 +147,7 @@ function tableDoubleClick(evt, row, index) {
     codeDesc: row.CODE_DESC,
   });
   console.log(codeStore.codeValue);
+  this.$router.push('/confUpdate');
 }
 
 /////////////////////////////////////////////////////////////////////////////
