@@ -79,17 +79,19 @@ const codeList = reactive({
 const $q = useQuasar();
 
 const codeId = computed(() => codeStore.codeId);
-
+const codeValue = computed(() => codeStore.codeValue);
+const codeName = computed(() => codeStore.codeName);
+const codeDesc = computed(() => codeStore.codeDesc);
 //const codeId = ref(1);
-const codeValue = ref(null);
-const codeName = ref(null);
-const codeDesc = ref(null);
+// const codeValue = ref(null);
+// const codeName = ref(null);
+// const codeDesc = ref(null);
 const accept = ref(false);
 
 //codeId.value = 1;
-codeValue.value = null;
-codeName.value = null;
-codeDesc.value = null;
+// codeValue.value = null;
+// codeName.value = null;
+// codeDesc.value = null;
 accept.value = false;
 
 function onReset() {
