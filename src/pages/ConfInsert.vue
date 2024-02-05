@@ -3,18 +3,18 @@
     <q-form @submit="onConsoleLog" @reset="onReset" class="q-gutter-md">
       <q-input
         filled
-        v-model="confId"
+        v-model="codeId"
         label="공통코드 ID "
-        hint="confId"
+        hint="codeId"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'Please type something']"
       />
 
       <q-input
         filled
-        v-model="confValue"
+        v-model="codeValue"
         label="공통코드 VALUE "
-        hint="confValue"
+        hint="codeValue"
         lazy-rules
         :rules="[
           val => !!val || '* Required',
@@ -24,9 +24,9 @@
 
       <q-input
         filled
-        v-model="confName"
+        v-model="codeName"
         label="공통코드 NAME "
-        hint="confName"
+        hint="codeName"
         lazy-rules
         :rules="[
           val => !!val || '* Required',
@@ -36,9 +36,9 @@
 
       <q-input
         filled
-        v-model="confDesc"
+        v-model="codeDesc"
         label="공통코드 설명 "
-        hint="confDesc"
+        hint="codeDesc"
         lazy-rules
         :rules="[
           val => !!val || '* Required',
@@ -62,8 +62,8 @@
   </div>
   <ul>
     <li>여기는 [{}] 구조의 reactive</li>
-    <li>{{ confList.value }}</li>
-    <li v-for="(value2, idx) in confList.data" :key="idx">
+    <li>{{ codeList.value }}</li>
+    <li v-for="(value2, idx) in codeList.data" :key="idx">
       : {{ value2.name }}
     </li>
   </ul>
@@ -74,13 +74,13 @@ import axios from 'axios';
 import { reactive, ref } from 'vue';
 import { useQuasar } from 'quasar';
 
-const confList = reactive({
+const codeList = reactive({
   data: [],
 });
 
-axios.post('/api/confObject').then(res => {
-  //confObject = res.data
-  confList.data = res.data;
+axios.post('/api/codeObject').then(res => {
+  //codeObject = res.data
+  codeList.data = res.data;
 });
 
 // const qantom = [
@@ -95,16 +95,16 @@ axios.post('/api/confObject').then(res => {
 // ];
 // const idx = 1;
 // axios.post('/api/idx/' + idx, { qantom }).then(res => {
-//   //confObject = res.data
+//   //codeObject = res.data
 //   console.log(res.data);
 // });
 
 const $q = useQuasar();
 
-const confId = ref(null);
-const confValue = ref(null);
-const confName = ref(null);
-const confDesc = ref(null);
+const codeId = ref(null);
+const codeValue = ref(null);
+const codeName = ref(null);
+const codeDesc = ref(null);
 const accept = ref(false);
 
 // function onSubmit() {
@@ -126,22 +126,22 @@ const accept = ref(false);
 // }
 
 function onReset() {
-  confId.value = null;
-  confValue.value = null;
-  confName.value = null;
-  confDesc.value = null;
+  codeId.value = null;
+  codeValue.value = null;
+  codeName.value = null;
+  codeDesc.value = null;
   accept.value = false;
 }
 function onConsoleLog() {
   const param = {
-    confId: confId.value,
-    confValue: confValue.value,
-    confName: confName.value,
-    confDesc: confDesc.value,
+    codeId: codeId.value,
+    codeValue: codeValue.value,
+    codeName: codeName.value,
+    codeDesc: codeDesc.value,
     creatId: 'ani',
   };
   const idx = 1;
-  axios.post('/api/saveConf/' + idx, { param }).then(res => {
+  axios.post('/api/saveCode/' + idx, { param }).then(res => {
     console.log(res.data);
   });
 }

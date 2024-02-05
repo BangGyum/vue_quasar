@@ -3,18 +3,18 @@
     <q-form @submit="onConsoleLog" @reset="onReset" class="q-gutter-md">
       <q-input
         filled
-        v-model="confId"
+        v-model="codeId"
         label="공통코드 ID "
-        hint="confId"
+        hint="codeId"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'Please type something']"
       />
 
       <q-input
         filled
-        v-model="confValue"
+        v-model="codeValue"
         label="공통코드 VALUE "
-        hint="confValue"
+        hint="codeValue"
         lazy-rules
         :rules="[
           val => !!val || '* Required',
@@ -24,9 +24,9 @@
 
       <q-input
         filled
-        v-model="confName"
+        v-model="codeName"
         label="공통코드 NAME "
-        hint="confName"
+        hint="codeName"
         lazy-rules
         :rules="[
           val => !!val || '* Required',
@@ -36,9 +36,9 @@
 
       <q-input
         filled
-        v-model="confDesc"
+        v-model="codeDesc"
         label="공통코드 설명 "
-        hint="confDesc"
+        hint="codeDesc"
         lazy-rules
         :rules="[
           val => !!val || '* Required',
@@ -60,73 +60,61 @@
       </div>
     </q-form>
   </div>
-  <ul>
-    <li>여기는 [{}] 구조의 reactive</li>
-    <li>{{ confList.value }}</li>
-    <li v-for="(value2, idx) in confList.data" :key="idx">
-      : {{ value2.name }}
-    </li>
-  </ul>
 </template>
 
 <script setup>
 import axios from 'axios';
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import { useCodeStore } from 'stores/codeStore';
+//import { storeToRefs } from 'pinia';
 
-const confList = reactive({
+const codeStore = useCodeStore();
+console.log(codeStore.codeId);
+
+const codeList = reactive({
   data: [],
-});
-
-axios.post('/api/confObject').then(res => {
-  //confObject = res.data
-  confList.data = res.data;
 });
 
 const $q = useQuasar();
 
-const confId = ref(null);
-const confValue = ref(null);
-const confName = ref(null);
-const confDesc = ref(null);
+const codeId = computed(() => codeStore.codeId);
+
+//const codeId = ref(1);
+const codeValue = ref(null);
+const codeName = ref(null);
+const codeDesc = ref(null);
 const accept = ref(false);
 
-confId.value = null;
-confValue.value = null;
-confName.value = null;
-confDesc.value = null;
+//codeId.value = 1;
+codeValue.value = null;
+codeName.value = null;
+codeDesc.value = null;
 accept.value = false;
 
 function onReset() {
-  confId.value = null;
-  confValue.value = null;
-  confName.value = null;
-  confDesc.value = null;
+  codeId.value = null;
+  codeValue.value = null;
+  codeName.value = null;
+  codeDesc.value = null;
   accept.value = false;
 }
 function onConsoleLog() {
   const param = {
-    confId: confId.value,
-    confValue: confValue.value,
-    confName: confName.value,
-    confDesc: confDesc.value,
+    codeId: codeId.value,
+    codeValue: codeValue.value,
+    codeName: codeName.value,
+    codeDesc: codeDesc.value,
     creatId: 'ani',
   };
-  const idx = 1;
-  axios.post('/api/saveConf/' + idx, { param }).then(res => {
-    console.log(res.data);
-  });
 }
 const testParam = {
-  //confId: confId.value,
-  //confValue: confValue.value,
-  confId: 'hanwooGender',
-  confValue: 'castration',
+  //codeId: codeId.value,
+  //codeValue: codeValue.value,
+  codeId: 'hanwooGender',
+  codeValue: 'castration',
 };
 const idxTest = 1;
-axios.post('/api/getConfig/' + idxTest, { testParam }).then(res => {
-  console.log(res.data);
-});
 </script>
 
 <style lang="scss" scoped>

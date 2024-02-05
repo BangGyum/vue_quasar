@@ -19,6 +19,7 @@
     <!-- Use getter directly -->
     <div>{{ store.doubleCount }}</div>
     <div>{{ store.quadrupleCount }}</div>
+    <div>{{ codeStore.codeId }}</div>
 
     <!-- Manipulate state directly -->
     <q-btn @click="store.count--">-</q-btn>
@@ -54,7 +55,7 @@
     <q-btn @click="increment()">+</q-btn>
   </div>
 
-  <q-btn to="/confInsert" label="To Docs index" outline color="purple" />
+  <q-btn to="/codeInsert" label="To Docs index" outline color="purple" />
 </template>
 
 <script setup>
@@ -62,22 +63,29 @@ import axios from 'axios';
 import { reactive, ref, computed, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCounterStore } from 'stores/counter';
+import { useCodeStore } from 'stores/codeStore';
 import { storeToRefs } from 'pinia';
+
+const store = useCounterStore();
+const codeStore = useCodeStore();
+// codeStore.setCodeId('11');
+// console.log(codeStore.codeId);
+// codeStore.setCodeId('22');
+
+// console.log(codeStore.codeId);
 
 const rows = reactive({
   data: [],
 });
-const confList = reactive({
+const codeList = reactive({
   data: [],
 });
 axios.get('/api/test').then(res => {
-  //confObject = res.data
-  //console.log(res.data);
-  confList.data = res.data;
-  console.log(confList.data);
+  codeList.data = res.data;
+  //console.table(codeList.data);
 
   for (let i = 0; i < 1000; i++) {
-    rows.data = rows.data.concat(confList.data.slice(0).map(r => ({ ...r })));
+    rows.data = rows.data.concat(codeList.data.slice(0).map(r => ({ ...r })));
   }
   rows.data.forEach((row, index) => {
     row.index = index;
@@ -91,40 +99,58 @@ pagination: ref({
 
 const $q = useQuasar();
 
-const confId = ref(null);
-const confValue = ref(null);
-const confName = ref(null);
-const confDesc = ref(null);
+// const codeId = ref(null);
+// const codeValue = ref(null);
+// const codeName = ref(null);
+// const codeDesc = ref(null);
+
+const codeId = computed(() => codeStore.codeId);
+const codeValue = computed(() => codeStore.codeValue);
+const codeName = computed(() => codeStore.codeName);
+const codeDesc = computed(() => codeStore.codeDesc);
+codeId.value = '44';
+
 const accept = ref(false);
 
 function onReset() {
-  confId.value = null;
-  confValue.value = null;
-  confName.value = null;
-  confDesc.value = null;
+  codeId.value = null;
+  codeValue.value = null;
+  codeName.value = null;
+  codeDesc.value = null;
   accept.value = false;
 }
 function onConsoleLog() {
   const param = {
-    confId: confId.value,
-    confValue: confValue.value,
-    confName: confName.value,
-    confDesc: confDesc.value,
+    codeId: codeId.value,
+    codeValue: codeValue.value,
+    codeName: codeName.value,
+    codeDesc: codeDesc.value,
     creatId: 'ani',
   };
   const idx = 1;
-  axios.post('/api/saveConf/' + idx, { param }).then(res => {
+  axios.post('/api/savecode/' + idx, { param }).then(res => {
     console.log(res.data);
   });
 }
+
 function tableDoubleClick(evt, row, index) {
-  console.log(evt);
-  console.log(row);
-  console.log(index);
+  console.table(row);
+  // codeStore.codeId(row.CODE_ID);
+  // codeStore.codeValue(row.CODE_VALUE);
+  // codeStore.codeName(row.CODE_NAME);
+
+  //codeStore.codeDesc;
+  codeStore.$patch({
+    codeId: row.CODE_ID,
+    codeName: row.CODE_NAME,
+    codeValue: row.CODE_VALUE,
+    codeDesc: row.CODE_DESC,
+  });
+  console.log(codeStore.codeValue);
 }
 
-const store = useCounterStore();
-
+/////////////////////////////////////////////////////////////////////////////
+//////****************  pinia TEST
 // Option 2: use computed and functions to use the store
 const count = computed(() => store.count);
 const quadruple = computed(() => store.quadrupleCount);
