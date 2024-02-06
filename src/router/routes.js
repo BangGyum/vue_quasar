@@ -9,6 +9,10 @@ const routes = [
       { path: 'confList', component: () => import('pages/ConfList.vue') },
       { path: 'confInsert', component: () => import('pages/ConfInsert.vue') },
       { path: 'confUpdate', component: () => import('pages/ConfUpdate.vue') },
+      {
+        path: 'confListServer',
+        component: () => import('pages/ConfListServer.vue'),
+      },
     ],
   },
   {

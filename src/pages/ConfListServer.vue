@@ -11,48 +11,35 @@
       @row-dblclick="tableDoubleClick"
     />
   </div>
-  <div>
-    <!-- Option 1 -->
-    <div>Direct store</div>
-    <!-- Read the state value directly -->
-    <div>{{ store.count }}</div>
-    <!-- Use getter directly -->
-    <div>{{ store.doubleCount }}</div>
-    <div>{{ store.quadrupleCount }}</div>
-    <div>{{ codeStore.codeId }}</div>
-
-    <!-- Manipulate state directly -->
-    <q-btn @click="store.count--">-</q-btn>
-    <!-- Use an action -->
-    <q-btn @click="store.increment()">+</q-btn>
-  </div>
-
-  <div>
-    <!-- Option 2 -->
-    <div>Indirect store</div>
-    <!-- Use the computed state -->
-    <div>{{ count }}</div>
-    <!-- Use the computed getter -->
-    <div>{{ doubleCountValue }}</div>
-
-    <!-- Use the exposed function -->
-    <q-btn @click="decrementCount()">-</q-btn>
-    <!-- Use the exposed function -->
-    <q-btn @click="incrementCount()">+</q-btn>
-  </div>
-
-  <div>
-    <!-- Option 3 -->
-    <div>Destructured store</div>
-    <!-- Use the destructured state -->
-    <div>{{ counter }}</div>
-    <!-- Use the destructured getter -->
-    <div>{{ doubleCount }}</div>
-
-    <!-- Manipulate state directly-->
-    <q-btn @click="count--">-</q-btn>
-    <!-- Use an action -->
-    <q-btn @click="increment()">+</q-btn>
+  <div class="q-pa-md">
+    <q-table
+      flat
+      bordered
+      ref="tableRef"
+      title="Treats"
+      :rows="data"
+      :columns="columns"
+      row-key="name"
+      v-model:pagination="pagination"
+      :loading="loading"
+      :filter="filter"
+      binary-state-sort
+      @request="onRequest"
+    >
+      <template v-slot:top-right>
+        <q-input
+          borderless
+          dense
+          debounce="300"
+          v-model="filter"
+          placeholder="Search"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+    </q-table>
   </div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
@@ -62,14 +49,69 @@
 import axios from 'axios';
 import { reactive, ref, computed, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
-import { useCounterStore } from 'stores/counter';
 import { useCodeStore } from 'stores/codeStore';
-import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
-const store = useCounterStore();
 const codeStore = useCodeStore();
 const router = useRouter();
+
+const pagination = ref({
+  sortBy: 'name',
+  descending: false,
+  page: 1,
+  rowsPerPage: 15,
+});
+
+const data = ref([]);
+
+const onRequest = async ({ pagination }) => {
+  const response = await axios.get('/api/data', {
+    params: {
+      page: 1,
+      pageSize: 10,
+      sortField: 'id',
+      sortOrder: 'asc',
+      filterField: 'name',
+      filterValue: '',
+    },
+  });
+  console.log(response);
+  data.value = response.data;
+};
+axios
+  .post('/api/data', {
+    params: {
+      page: 1,
+      pageSize: 10,
+      //sortField: '',
+      sortOrder: 'code_id',
+      //filterField: 'name',
+      //filterValue: '',
+    },
+  })
+  .then(res => {
+    codeList.data = res.data;
+    //console.table(codeList.data);
+
+    for (let i = 0; i < 1; i++) {
+      rows.data = rows.data.concat(codeList.data.slice(0).map(r => ({ ...r })));
+    }
+    rows.data.forEach((row, index) => {
+      row.index = index;
+    });
+  });
+
+// const param = {
+//     codeId: codeId.value,
+//     codeValue: codeValue.value,
+//     codeName: codeName.value,
+//     codeDesc: codeDesc.value,
+//     creatId: 'ani',
+//   };
+//   const idx = 1;
+//   axios.post('/api/saveCode/' + idx, { param }).then(res => {
+//     console.log(res.data);
+//   });
 
 const rows = reactive({
   data: [],
@@ -91,15 +133,7 @@ axios.get('/api/test').then(res => {
 pagination: ref({
   rowsPerPage: 1,
 });
-
-// we generate lots of rows here
-
 const $q = useQuasar();
-
-// const codeId = ref(null);
-// const codeValue = ref(null);
-// const codeName = ref(null);
-// const codeDesc = ref(null);
 
 const codeId = computed(() => codeStore.codeId);
 const codeValue = computed(() => codeStore.codeValue);
@@ -109,34 +143,9 @@ codeId.value = '44';
 
 const accept = ref(false);
 
-function onReset() {
-  codeId.value = null;
-  codeValue.value = null;
-  codeName.value = null;
-  codeDesc.value = null;
-  accept.value = false;
-}
-function onConsoleLog() {
-  const param = {
-    codeId: codeId.value,
-    codeValue: codeValue.value,
-    codeName: codeName.value,
-    codeDesc: codeDesc.value,
-    creatId: 'ani',
-  };
-  const idx = 1;
-  axios.post('/api/savecode/' + idx, { param }).then(res => {
-    console.log(res.data);
-  });
-}
-
 function tableDoubleClick(evt, row, index) {
   console.table(row);
-  // codeStore.codeId(row.CODE_ID);
-  // codeStore.codeValue(row.CODE_VALUE);
-  // codeStore.codeName(row.CODE_NAME);
 
-  //codeStore.codeDesc;
   codeStore.$patch({
     codeId: row.CODE_ID,
     codeName: row.CODE_NAME,
@@ -147,18 +156,6 @@ function tableDoubleClick(evt, row, index) {
   router.push('/confUpdate');
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//////****************  pinia TEST
-// Option 2: use computed and functions to use the store
-const count = computed(() => store.count);
-const quadruple = computed(() => store.quadrupleCount);
-const doubleCountValue = computed(() => store.doubleCount);
-const incrementCount = () => store.increment(); // use action
-const decrementCount = () => store.count--; // manipulate directly
-
-// Option 3: use destructuring to use the store in the template
-const { counter, doubleCount } = storeToRefs(store); // state and getters need "storeToRefs"
-const { increment } = store; // actions can be destructured directly
 const columns = [
   {
     name: 'index',

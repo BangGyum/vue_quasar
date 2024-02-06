@@ -83,22 +83,6 @@ axios.post('/api/codeObject').then(res => {
   codeList.data = res.data;
 });
 
-// const qantom = [
-//   {
-//     name: 'yaho',
-//     age: 1,
-//   },
-//   {
-//     name: 'yahooo',
-//     age: 454,
-//   },
-// ];
-// const idx = 1;
-// axios.post('/api/idx/' + idx, { qantom }).then(res => {
-//   //codeObject = res.data
-//   console.log(res.data);
-// });
-
 const $q = useQuasar();
 
 const codeId = ref(null);
@@ -106,24 +90,6 @@ const codeValue = ref(null);
 const codeName = ref(null);
 const codeDesc = ref(null);
 const accept = ref(false);
-
-// function onSubmit() {
-//   if (accept.value !== true) {
-//     $q.notify({
-//       color: 'red-5',
-//       textColor: 'white',
-//       icon: 'warning',
-//       message: 'You need to accept the license and terms first',
-//     });
-//   } else {
-//     $q.notify({
-//       color: 'green-4',
-//       textColor: 'white',
-//       icon: 'cloud_done',
-//       message: 'Submitted',
-//     });
-//   }
-// }
 
 function onReset() {
   codeId.value = null;
