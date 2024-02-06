@@ -65,14 +65,11 @@ import { useQuasar } from 'quasar';
 import { useCounterStore } from 'stores/counter';
 import { useCodeStore } from 'stores/codeStore';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 
 const store = useCounterStore();
 const codeStore = useCodeStore();
-// codeStore.setCodeId('11');
-// console.log(codeStore.codeId);
-// codeStore.setCodeId('22');
-
-// console.log(codeStore.codeId);
+const router = useRouter();
 
 const rows = reactive({
   data: [],
@@ -147,7 +144,7 @@ function tableDoubleClick(evt, row, index) {
     codeDesc: row.CODE_DESC,
   });
   console.log(codeStore.codeValue);
-  this.$router.push('/confUpdate');
+  router.push('/confUpdate');
 }
 
 /////////////////////////////////////////////////////////////////////////////

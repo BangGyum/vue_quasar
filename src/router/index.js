@@ -9,7 +9,6 @@ import routes from './routes';
 import { createPinia } from 'pinia';
 import App from '../App.vue';
 import { createApp, inject } from 'vue';
-
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
