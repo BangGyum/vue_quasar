@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md" style="max-width: 400px">
-    <q-form @submit="onConsoleLog" @reset="onReset" class="q-gutter-md">
+    <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
       <q-input
         filled
         v-model="codeId"
@@ -45,8 +45,8 @@
           val => val.length < 255 || 'Please use maximum 255 character',
         ]"
       />
-
-      <q-toggle v-model="accept" label="I accept the license and terms" />
+      <!--
+      <q-toggle v-model="accept" label="I accept the license and terms" /> -->
 
       <div>
         <q-btn label="Submit" type="submit" color="primary" />
@@ -60,28 +60,12 @@
       </div>
     </q-form>
   </div>
-  <ul>
-    <li>여기는 [{}] 구조의 reactive</li>
-    <li>{{ codeList.value }}</li>
-    <li v-for="(value2, idx) in codeList.data" :key="idx">
-      : {{ value2.name }}
-    </li>
-  </ul>
 </template>
 
 <script setup>
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 import { useQuasar } from 'quasar';
-
-const codeList = reactive({
-  data: [],
-});
-
-axios.post('/api/codeObject').then(res => {
-  //codeObject = res.data
-  codeList.data = res.data;
-});
 
 const $q = useQuasar();
 
@@ -98,7 +82,7 @@ function onReset() {
   codeDesc.value = null;
   accept.value = false;
 }
-function onConsoleLog() {
+function onSubmit() {
   const param = {
     codeId: codeId.value,
     codeValue: codeValue.value,

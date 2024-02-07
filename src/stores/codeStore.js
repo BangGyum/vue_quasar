@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useCodeStore = defineStore('codeDetail', () => {
-  const codeId = ref('11');
+  const codeId = ref('');
   const codeValue = ref('');
   const codeName = ref('');
   const codeDesc = ref('');

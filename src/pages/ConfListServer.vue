@@ -17,7 +17,7 @@
       bordered
       ref="tableRef"
       title="Treats"
-      :rows="data"
+      :rows="rows2.data"
       :columns="columns"
       row-key="name"
       v-model:pagination="pagination"
@@ -47,7 +47,7 @@
 
 <script setup>
 import axios from 'axios';
-import { reactive, ref, computed, nextTick } from 'vue';
+import { reactive, ref, computed, nextTick, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
@@ -55,52 +55,139 @@ import { useRouter } from 'vue-router';
 const codeStore = useCodeStore();
 const router = useRouter();
 
+const tableRef = ref();
 const pagination = ref({
-  sortBy: 'name',
-  descending: false,
+  // sortBy: 'name',
+  // descending: false,
+  // page: 1,
+  rowsPerPage: 5,
   page: 1,
-  rowsPerPage: 15,
+  //sortField: '',
+  sortOrder: 'code_id',
+});
+const fetchData = async () => {
+  //const startRow = 0;
+  //const count = 10;
+  //const filter = 'test';
+  //const sortBy = 'name';
+  //const descending = false;
+  const page = 1;
+  const rowsPerPage = 5;
+  const sortOrder = 'CODE_ID';
+
+  rows2.data = await fetchFromServer(page, rowsPerPage, sortOrder);
+};
+const rows2 = reactive({
+  //table에 직접 들어갈
+  data: [],
 });
 
-const data = ref([]);
-
-const onRequest = async ({ pagination }) => {
-  const response = await axios.get('/api/data', {
-    params: {
-      page: 1,
-      pageSize: 10,
-      sortField: 'id',
-      sortOrder: 'asc',
-      filterField: 'name',
-      filterValue: '',
-    },
-  });
-  console.log(response);
-  data.value = response.data;
-};
-axios
-  .post('/api/data', {
-    params: {
-      page: 1,
-      pageSize: 10,
-      //sortField: '',
-      sortOrder: 'code_id',
-      //filterField: 'name',
-      //filterValue: '',
-    },
-  })
-  .then(res => {
-    codeList.data = res.data;
-    //console.table(codeList.data);
-
-    for (let i = 0; i < 1; i++) {
-      rows.data = rows.data.concat(codeList.data.slice(0).map(r => ({ ...r })));
-    }
-    rows.data.forEach((row, index) => {
-      row.index = index;
+//페이징
+async function fetchFromServer(page, rowsPerPage, sortOrder) {
+  try {
+    const response = await axios.post('/api/data', {
+      params: {
+        page: page,
+        rowsPerPage: rowsPerPage,
+        //sortField: '',
+        sortOrder: sortOrder,
+        //filterField: 'name',
+        //filterValue: '',
+      },
     });
-  });
+    //console.log('오류안난듯');
+    //console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
 
+onMounted(fetchData);
+
+pagination.value.rowsNumber = getRowsNumberCount('필터데이터');
+
+async function getRowsNumberCount(filter) {
+  try {
+    const response = await axios.get('/api/getConfigCount', {
+      params: {
+        filterValue: filter,
+      },
+    });
+    //console.log('오류안난듯count');
+    //console.log(response.data[0].COUNT);
+    return response.data[0].COUNT;
+  } catch (error) {
+    console.error(error);
+    return 0;
+  }
+}
+
+async function onRequest(props) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  const filter = props.filter;
+
+  loading.value = true;
+
+  try {
+    pagination.value.rowsNumber = await getRowsNumberCount(
+      '일단 임시 필터데이터',
+    );
+    const fetchCount =
+      rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
+    const startRow = (page - 1) * rowsPerPage;
+    const returnedData = await fetchFromServer(
+      startRow,
+      fetchCount,
+      filter,
+      sortBy,
+      descending,
+    );
+
+    rows.value.splice(0, rows.value.length, ...returnedData);
+
+    pagination.value.page = page;
+    pagination.value.rowsPerPage = rowsPerPage;
+    pagination.value.sortBy = sortBy;
+    pagination.value.descending = descending;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  tableRef.value.requestServerInteraction();
+});
+
+// axios
+//   .post('/api/data', {
+//     params: {
+//       page: 1,
+//       rowsPerPage: 5,
+//       //sortField: '',
+//       sortOrder: 'code_id',
+//       //filterField: 'name',
+//       //filterValue: '',
+//     },
+//   })
+//   .then(res => {
+//     codeList.data = res.data;
+//     console.log(res.data);
+//     //console.table(codeList.data);
+
+//     for (let i = 0; i < 1; i++) {
+//       rows2.data = rows2.data.concat(
+//         codeList.data.slice(0).map(r => ({ ...r })),
+//       );
+//     }
+//     rows2.data.forEach((row, index) => {
+//       row.index = index;
+//     });
+//   });
+///////////////////////////////////////////////////////////////////////
 // const param = {
 //     codeId: codeId.value,
 //     codeValue: codeValue.value,
