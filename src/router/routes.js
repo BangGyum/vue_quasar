@@ -13,6 +13,10 @@ const routes = [
         path: 'confListServer',
         component: () => import('pages/ConfListServer.vue'),
       },
+      {
+        path: 'confListTest',
+        component: () => import('pages/ConfListTest.vue'),
+      },
     ],
   },
   {

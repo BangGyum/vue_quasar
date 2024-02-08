@@ -63,6 +63,12 @@ const linksList = [
     to: '/confListServer',
   },
   {
+    title: 'ConfListTest',
+    caption: 'quasar.dev',
+    icon: 'school',
+    to: '/confListTest',
+  },
+  {
     title: 'ConfInsert',
     caption: 'quasar.dev',
     icon: 'school',

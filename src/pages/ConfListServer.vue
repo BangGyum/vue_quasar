@@ -1,23 +1,11 @@
 <template>
   <div class="q-pa-md">
     <q-table
-      class="my-sticky-header-table"
-      flat
-      bordered
-      title="Treats"
-      :rows="rows.data"
-      :columns="columns"
-      row-key="name"
-      @row-dblclick="tableDoubleClick"
-    />
-  </div>
-  <div class="q-pa-md">
-    <q-table
       flat
       bordered
       ref="tableRef"
       title="Treats"
-      :rows="rows2.data"
+      :rows="rows.data"
       :columns="columns"
       row-key="name"
       v-model:pagination="pagination"
@@ -56,43 +44,47 @@ const codeStore = useCodeStore();
 const router = useRouter();
 
 const tableRef = ref();
+const filter = ref('');
+const loading = ref(false);
 const pagination = ref({
-  // sortBy: 'name',
-  // descending: false,
-  // page: 1,
-  rowsPerPage: 5,
-  page: 1,
-  //sortField: '',
   sortOrder: 'code_id',
+  sortBy: 'desc',
+  descending: false,
+  page: 1,
+  rowsPerPage: 3,
+  rowsNumber: 10,
 });
-const fetchData = async () => {
-  //const startRow = 0;
-  //const count = 10;
-  //const filter = 'test';
-  //const sortBy = 'name';
-  //const descending = false;
-  const page = 1;
-  const rowsPerPage = 5;
-  const sortOrder = 'CODE_ID';
+// const fetchData = async () => {
+//   //const startRow = 0;
+//   //const count = 10;
+//   //const filter = 'test';
+//   //const sortBy = 'name';
+//   //const descending = false;
+//   const page = pagination.value.page;
+//   const rowsPerPage = pagination.value.rowsPerPage;
+//   const sortOrder = pagination.value.sortOrder;
 
-  rows2.data = await fetchFromServer(page, rowsPerPage, sortOrder);
-};
-const rows2 = reactive({
+//   rows2.data = await fetchFromServer(page, rowsPerPage, sortOrder);
+// };
+// onMounted(fetchData);
+
+const rows = reactive({
   //table에 직접 들어갈
   data: [],
 });
 
 //페이징
-async function fetchFromServer(page, rowsPerPage, sortOrder) {
+async function fetchFromServer(startRow, rowsPerPage, sortOrder) {
+  console.log(
+    'fetchFromServer 진입 : ' + startRow + ',' + rowsPerPage + ',' + sortOrder,
+  );
   try {
     const response = await axios.post('/api/data', {
       params: {
-        page: page,
+        page: 0,
+        startRow: startRow,
         rowsPerPage: rowsPerPage,
-        //sortField: '',
-        sortOrder: sortOrder,
-        //filterField: 'name',
-        //filterValue: '',
+        sortOrder: 'CODE_ID',
       },
     });
     //console.log('오류안난듯');
@@ -103,8 +95,6 @@ async function fetchFromServer(page, rowsPerPage, sortOrder) {
     return [];
   }
 }
-
-onMounted(fetchData);
 
 pagination.value.rowsNumber = getRowsNumberCount('필터데이터');
 
@@ -125,8 +115,11 @@ async function getRowsNumberCount(filter) {
 }
 
 async function onRequest(props) {
+  console.log('--------------------진입');
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
   const filter = props.filter;
+  console.log('page:' + page);
+  console.log(filter);
 
   loading.value = true;
 
@@ -140,12 +133,16 @@ async function onRequest(props) {
     const returnedData = await fetchFromServer(
       startRow,
       fetchCount,
-      filter,
+      //filter,
       sortBy,
-      descending,
+      //descending,
     );
 
-    rows.value.splice(0, rows.value.length, ...returnedData);
+    console.log(returnedData);
+    // if (!Array.isArray(rows.value)) {
+    //   rows.value = [];
+    // }
+    rows.data.splice(0, rows.data.length, ...returnedData);
 
     pagination.value.page = page;
     pagination.value.rowsPerPage = rowsPerPage;
@@ -200,49 +197,6 @@ onMounted(() => {
 //     console.log(res.data);
 //   });
 
-const rows = reactive({
-  data: [],
-});
-const codeList = reactive({
-  data: [],
-});
-axios.get('/api/test').then(res => {
-  codeList.data = res.data;
-  //console.table(codeList.data);
-
-  for (let i = 0; i < 1; i++) {
-    rows.data = rows.data.concat(codeList.data.slice(0).map(r => ({ ...r })));
-  }
-  rows.data.forEach((row, index) => {
-    row.index = index;
-  });
-});
-pagination: ref({
-  rowsPerPage: 1,
-});
-const $q = useQuasar();
-
-const codeId = computed(() => codeStore.codeId);
-const codeValue = computed(() => codeStore.codeValue);
-const codeName = computed(() => codeStore.codeName);
-const codeDesc = computed(() => codeStore.codeDesc);
-codeId.value = '44';
-
-const accept = ref(false);
-
-function tableDoubleClick(evt, row, index) {
-  console.table(row);
-
-  codeStore.$patch({
-    codeId: row.CODE_ID,
-    codeName: row.CODE_NAME,
-    codeValue: row.CODE_VALUE,
-    codeDesc: row.CODE_DESC,
-  });
-  console.log(codeStore.codeValue);
-  router.push('/confUpdate');
-}
-
 const columns = [
   {
     name: 'index',
@@ -289,16 +243,6 @@ const columns = [
     field: 'UPDATE_ID',
     sortable: true,
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
-  },
-];
-
-const linksList = [
-  //여기의 메뉴 목록은 위에 EssenstialLink 컴포넌트로 렌더링되기 때문에 위에서 수정
-  {
-    title: 'Typography',
-    caption: 'quasar.dev',
-    icon: 'school',
-    to: '/typography',
   },
 ];
 </script>

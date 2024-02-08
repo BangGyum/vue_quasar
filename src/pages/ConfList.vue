@@ -7,67 +7,32 @@
       title="Treats"
       :rows="rows.data"
       :columns="columns"
+      v-model:selected="selected"
+      selection="single"
       row-key="name"
       @row-dblclick="tableDoubleClick"
     />
   </div>
-  <div>
-    <!-- Option 1 -->
-    <div>Direct store</div>
-    <!-- Read the state value directly -->
-    <div>{{ store.count }}</div>
-    <!-- Use getter directly -->
-    <div>{{ store.doubleCount }}</div>
-    <div>{{ store.quadrupleCount }}</div>
-    <div>{{ codeStore.codeId }}</div>
 
-    <!-- Manipulate state directly -->
-    <q-btn @click="store.count--">-</q-btn>
-    <!-- Use an action -->
-    <q-btn @click="store.increment()">+</q-btn>
-  </div>
-
-  <div>
-    <!-- Option 2 -->
-    <div>Indirect store</div>
-    <!-- Use the computed state -->
-    <div>{{ count }}</div>
-    <!-- Use the computed getter -->
-    <div>{{ doubleCountValue }}</div>
-
-    <!-- Use the exposed function -->
-    <q-btn @click="decrementCount()">-</q-btn>
-    <!-- Use the exposed function -->
-    <q-btn @click="incrementCount()">+</q-btn>
-  </div>
-
-  <div>
-    <!-- Option 3 -->
-    <div>Destructured store</div>
-    <!-- Use the destructured state -->
-    <div>{{ counter }}</div>
-    <!-- Use the destructured getter -->
-    <div>{{ doubleCount }}</div>
-
-    <!-- Manipulate state directly-->
-    <q-btn @click="count--">-</q-btn>
-    <!-- Use an action -->
-    <q-btn @click="increment()">+</q-btn>
-  </div>
+  <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
+
+  <div class="q-pa-md">
+    <q-btn label="Click Me" @click="showAlert" />
+  </div>
 </template>
 
 <script setup>
 import axios from 'axios';
 import { reactive, ref, computed, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
-import { useCounterStore } from 'stores/counter';
 import { useCodeStore } from 'stores/codeStore';
-import { storeToRefs } from 'pinia';
+//import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
-const store = useCounterStore();
+const selected = ref([]);
+
 const codeStore = useCodeStore();
 const router = useRouter();
 
@@ -88,18 +53,8 @@ axios.get('/api/test').then(res => {
     row.index = index;
   });
 });
-pagination: ref({
-  rowsPerPage: 1,
-});
-
-// we generate lots of rows here
 
 const $q = useQuasar();
-
-// const codeId = ref(null);
-// const codeValue = ref(null);
-// const codeName = ref(null);
-// const codeDesc = ref(null);
 
 const codeId = computed(() => codeStore.codeId);
 const codeValue = computed(() => codeStore.codeValue);
@@ -147,18 +102,15 @@ function tableDoubleClick(evt, row, index) {
   router.push('/confUpdate');
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//////****************  pinia TEST
-// Option 2: use computed and functions to use the store
-const count = computed(() => store.count);
-const quadruple = computed(() => store.quadrupleCount);
-const doubleCountValue = computed(() => store.doubleCount);
-const incrementCount = () => store.increment(); // use action
-const decrementCount = () => store.count--; // manipulate directly
+const showAlert = () => {
+  $q.dialog({
+    title: 'Confirm',
+    message: 'Button clicked!',
+    ok: 'OK',
+  });
+};
 
-// Option 3: use destructuring to use the store in the template
-const { counter, doubleCount } = storeToRefs(store); // state and getters need "storeToRefs"
-const { increment } = store; // actions can be destructured directly
+//--------------------------------------------------------
 const columns = [
   {
     name: 'index',
@@ -205,16 +157,6 @@ const columns = [
     field: 'UPDATE_ID',
     sortable: true,
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
-  },
-];
-
-const linksList = [
-  //여기의 메뉴 목록은 위에 EssenstialLink 컴포넌트로 렌더링되기 때문에 위에서 수정
-  {
-    title: 'Typography',
-    caption: 'quasar.dev',
-    icon: 'school',
-    to: '/typography',
   },
 ];
 </script>
