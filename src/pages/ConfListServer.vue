@@ -19,7 +19,11 @@
     >
       <template v-slot:top-right>
         <q-btn color="secondary" label="Update" @click="moveConfUpdate" />
-        <q-btn style="background: #ff0080; color: white" label="Delete" />
+        <q-btn
+          style="background: #ff0080; color: white"
+          label="Delete"
+          @click="deleteClick"
+        />
         <q-input
           borderless
           dense
@@ -37,6 +41,19 @@
   <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
+  <!--삭제팝업-->
+  <q-dialog v-model="confirm" persistent>
+    <q-card>
+      <q-card-section class="row items-center">
+        <span class="text-h6">{{ deleteMessage }}</span>
+      </q-card-section>
+
+      <q-card-actions align="left">
+        <q-btn flat label="Yes baby" color="primary" v-close-popup />
+        <q-btn flat label="NO" color="primary" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -48,6 +65,9 @@ import { useRouter } from 'vue-router';
 
 const codeStore = useCodeStore();
 const router = useRouter();
+
+const confirm = ref(false);
+const deleteMessage = '해당 데이터를 삭제 하시겠습니까?';
 
 const selected = ref([]);
 
@@ -131,6 +151,27 @@ async function getRowsNumberCount(filter) {
     console.error(error);
     return 0;
   }
+}
+
+function deleteClick() {
+  confirm.value = true;
+}
+function deleteOperation() {
+  const param = {
+    codeId: codeId.value,
+    codeValue: codeValue.value,
+    updateId: 'aniUpdate',
+  };
+
+  axios.post('/api/deleteCode', { param }).then(res => {
+    console.log(res.data);
+    if (res.data === '성공') {
+      dialogValue.value = '성공';
+      alert.value = true;
+    } else {
+      console.log('실패');
+    }
+  });
 }
 
 async function onRequest(props) {
