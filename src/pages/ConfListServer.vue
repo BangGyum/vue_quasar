@@ -1,26 +1,31 @@
 <template>
   <div class="q-pa-md">
     <q-table
+      class="my-sticky-header-table"
       flat
       bordered
       ref="tableRef"
       title="Treats"
       :rows="rows.data"
       :columns="columns"
-      row-key="name"
+      row-key="CODE_ID"
       v-model:pagination="pagination"
+      v-model:selected="selected"
+      selection="single"
       :loading="loading"
       :filter="filter"
       binary-state-sort
       @request="onRequest"
     >
       <template v-slot:top-right>
+        <q-btn color="secondary" label="Update" @click="moveConfUpdate" />
+        <q-btn style="background: #ff0080; color: white" label="Delete" />
         <q-input
           borderless
           dense
           debounce="300"
           v-model="filter"
-          placeholder="Search"
+          placeholder="  Search"
         >
           <template v-slot:append>
             <q-icon name="search" />
@@ -29,6 +34,7 @@
       </template>
     </q-table>
   </div>
+  <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
 </template>
@@ -43,13 +49,14 @@ import { useRouter } from 'vue-router';
 const codeStore = useCodeStore();
 const router = useRouter();
 
+const selected = ref([]);
+
 const tableRef = ref();
 const filter = ref('');
 const loading = ref(false);
 const pagination = ref({
-  sortOrder: 'code_id',
-  sortBy: 'desc',
-  descending: false,
+  sortBy: 'CODE_ID',
+  descending: 'desc',
   page: 1,
   rowsPerPage: 3,
   rowsNumber: 10,
@@ -73,18 +80,30 @@ const rows = reactive({
   data: [],
 });
 
+function moveConfUpdate() {
+  console.log(selected.value[0]);
+  codeStore.$patch({
+    codeId: selected.value[0].CODE_ID,
+    codeName: selected.value[0].CODE_NAME,
+    codeValue: selected.value[0].CODE_VALUE,
+    codeDesc: selected.value[0].CODE_DESC,
+  });
+  router.push('/confUpdate');
+}
+
 //페이징
-async function fetchFromServer(startRow, rowsPerPage, sortOrder) {
-  console.log(
-    'fetchFromServer 진입 : ' + startRow + ',' + rowsPerPage + ',' + sortOrder,
-  );
+async function fetchFromServer(startRow, rowsPerPage, sortBy, descending) {
+  // console.log(
+  //   'fetchFromServer 진입 : ' + startRow + ',' + rowsPerPage + ',' + sortOrder,
+  // );
   try {
     const response = await axios.post('/api/data', {
       params: {
         page: 0,
         startRow: startRow,
         rowsPerPage: rowsPerPage,
-        sortOrder: 'CODE_ID',
+        sortBy: sortBy,
+        descending: descending,
       },
     });
     //console.log('오류안난듯');
@@ -135,7 +154,7 @@ async function onRequest(props) {
       fetchCount,
       //filter,
       sortBy,
-      //descending,
+      descending,
     );
 
     console.log(returnedData);

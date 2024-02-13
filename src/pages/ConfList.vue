@@ -9,7 +9,7 @@
       :columns="columns"
       v-model:selected="selected"
       selection="single"
-      row-key="name"
+      row-key="CODE_ID"
       @row-dblclick="tableDoubleClick"
     />
   </div>
