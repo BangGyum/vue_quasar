@@ -17,6 +17,12 @@ import { createApp, inject } from 'vue';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
+
+// inside of a Vue file
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
+
 const pinia = createPinia();
 const app = createApp(App);
 

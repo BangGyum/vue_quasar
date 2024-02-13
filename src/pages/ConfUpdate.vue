@@ -59,6 +59,31 @@
         />
       </div>
     </q-form>
+    <div class="q-pa-md q-gutter-sm">
+      <q-btn label="Alert" color="primary" @click="showAlert" />
+
+      <q-dialog v-model="alert">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Alert</div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            {{ dialogValue }}
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="OK"
+              color="primary"
+              v-close-popup
+              @click="goList"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
@@ -67,7 +92,11 @@ import axios from 'axios';
 import { reactive, ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
+import { useRouter } from 'vue-router';
 //import { storeToRefs } from 'pinia';
+
+const alert = ref(false);
+const dialogValue = ref('-');
 
 const codeStore = useCodeStore();
 console.log(codeStore.codeId);
@@ -75,7 +104,7 @@ console.log(codeStore.codeId);
 const codeList = reactive({
   data: [],
 });
-
+const router = useRouter();
 const $q = useQuasar();
 
 const codeId = computed(() => codeStore.codeId);
@@ -100,8 +129,39 @@ function onSubmit() {
 
   axios.post('/api/updateCode', { param }).then(res => {
     console.log(res.data);
+    if (res.data === '성공') {
+      dialogValue.value = '성공';
+      alert.value = true;
+      //router.push('/confListServer');
+    } else {
+      console.log('실패');
+    }
   });
 }
+function goList() {
+  router.push('/confListServer');
+}
+
+function showAlert() {
+  alert.value = true;
+}
+
+// function alert() {
+//   $q.dialog({
+//     dark: true,
+//     title: 'Alert',
+//     message: 'Some message',
+//   })
+//     .onOk(() => {
+//       // console.log('OK')
+//     })
+//     .onCancel(() => {
+//       // console.log('Cancel')
+//     })
+//     .onDismiss(() => {
+//       // console.log('I am triggered on both OK and Cancel')
+//     });
+// }
 </script>
 
 <style lang="scss" scoped>
