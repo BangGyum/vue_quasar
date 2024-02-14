@@ -18,6 +18,12 @@
       @request="onRequest"
     >
       <template v-slot:top-right>
+        <q-select
+          v-model="model"
+          :options="options"
+          label="Standard"
+          style="width: 200px"
+        />
         <q-btn color="secondary" label="Update" @click="moveConfUpdate" />
         <q-btn
           style="background: #ff0080; color: white"
@@ -81,6 +87,9 @@ const pagination = ref({
   rowsPerPage: 3,
   rowsNumber: 10,
 });
+
+const model = ref(null);
+const options = reactive(['Google', 'Facebook', 'Twitter', 'Apple', 'Oracle']);
 // const fetchData = async () => {
 //   //const startRow = 0;
 //   //const count = 10;
@@ -305,6 +314,8 @@ const columns = [
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
 ];
+
+console.log(columns.name);
 </script>
 <style lang="sass">
 .my-sticky-header-table
