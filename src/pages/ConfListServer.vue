@@ -13,13 +13,13 @@
       v-model:selected="selected"
       selection="single"
       :loading="loading"
-      :filter="filter"
+      :filter="filterValue"
       binary-state-sort
       @request="onRequest"
     >
       <template v-slot:top-right>
         <q-select
-          v-model="model"
+          v-model="selectValue"
           :options="options"
           label="Standard"
           style="width: 200px"
@@ -34,7 +34,7 @@
           borderless
           dense
           debounce="300"
-          v-model="filter"
+          v-model="filterValue"
           placeholder="  Search"
         >
           <template v-slot:append>
@@ -72,37 +72,32 @@ import { useRouter } from 'vue-router';
 const codeStore = useCodeStore();
 const router = useRouter();
 
+const selectValue = ref('');
+
 const confirm = ref(false);
 const deleteMessage = '해당 데이터를 삭제 하시겠습니까?';
 
 const selected = ref([]);
 
 const tableRef = ref();
-const filter = ref('');
+const filterValue = ref('');
+const options = reactive([
+  'CODE_ID',
+  'CODE_VALUE',
+  'CODE_NAME',
+  'Apple',
+  'Oracle',
+]);
 const loading = ref(false);
 const pagination = ref({
   sortBy: 'CODE_ID',
-  descending: 'desc',
+  descending: 'false',
   page: 1,
   rowsPerPage: 3,
   rowsNumber: 10,
 });
 
 const model = ref(null);
-const options = reactive(['Google', 'Facebook', 'Twitter', 'Apple', 'Oracle']);
-// const fetchData = async () => {
-//   //const startRow = 0;
-//   //const count = 10;
-//   //const filter = 'test';
-//   //const sortBy = 'name';
-//   //const descending = false;
-//   const page = pagination.value.page;
-//   const rowsPerPage = pagination.value.rowsPerPage;
-//   const sortOrder = pagination.value.sortOrder;
-
-//   rows2.data = await fetchFromServer(page, rowsPerPage, sortOrder);
-// };
-// onMounted(fetchData);
 
 const rows = reactive({
   //table에 직접 들어갈
@@ -119,12 +114,28 @@ function moveConfUpdate() {
   });
   router.push('/confUpdate');
 }
-
+let descendingFinal = '';
 //페이징
-async function fetchFromServer(startRow, rowsPerPage, sortBy, descending) {
-  // console.log(
-  //   'fetchFromServer 진입 : ' + startRow + ',' + rowsPerPage + ',' + sortOrder,
-  // );
+async function fetchFromServer(
+  startRow,
+  rowsPerPage,
+  onSelectValue,
+  onFilterValue,
+  sortBy,
+  descending,
+) {
+  if (descending === true) {
+    descendingFinal = 'desc';
+  } else {
+    descendingFinal = 'asc';
+  }
+  console.log('-----------fetchFromServer');
+  console.log('sortBy:' + sortBy);
+  console.log('descending :' + descending);
+  console.log('filterName(onSelectValue) :' + onSelectValue);
+  console.log('filterValue(onFilterValue) :' + onFilterValue);
+  console.log('descendingFinal:' + descendingFinal);
+  console.log('/////-------fetchFromServer');
   try {
     const response = await axios.post('/api/data', {
       params: {
@@ -132,7 +143,9 @@ async function fetchFromServer(startRow, rowsPerPage, sortBy, descending) {
         startRow: startRow,
         rowsPerPage: rowsPerPage,
         sortBy: sortBy,
-        descending: descending,
+        descendingFinal: descendingFinal,
+        filterName: onSelectValue,
+        filterValue: onFilterValue,
       },
     });
     //console.log('오류안난듯');
@@ -144,13 +157,14 @@ async function fetchFromServer(startRow, rowsPerPage, sortBy, descending) {
   }
 }
 
-pagination.value.rowsNumber = getRowsNumberCount('필터데이터');
+pagination.value.rowsNumber = getRowsNumberCount('필터컬럼명', '필터데이터');
 
-async function getRowsNumberCount(filter) {
+async function getRowsNumberCount(filterName, filterValue) {
   try {
     const response = await axios.get('/api/getConfigCount', {
       params: {
-        filterValue: filter,
+        filterName: filterName,
+        filterValue: filterValue,
       },
     });
     //console.log('오류안난듯count');
@@ -186,9 +200,14 @@ function deleteOperation() {
 async function onRequest(props) {
   console.log('--------------------진입');
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
-  const filter = props.filter;
+  const onSelectValue = selectValue.value;
+  const onFilterValue = filterValue.value;
+  console.log('-----------onRequest');
   console.log('page:' + page);
-  console.log(filter);
+  console.log('sortBy :' + sortBy);
+  console.log('selectValue(filterName):' + selectValue.value);
+  console.log('filterValue:' + onFilterValue);
+  console.log('/////-------onRequest');
 
   loading.value = true;
 
@@ -202,7 +221,8 @@ async function onRequest(props) {
     const returnedData = await fetchFromServer(
       startRow,
       fetchCount,
-      //filter,
+      onSelectValue,
+      onFilterValue,
       sortBy,
       descending,
     );
@@ -227,44 +247,6 @@ async function onRequest(props) {
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
-
-// axios
-//   .post('/api/data', {
-//     params: {
-//       page: 1,
-//       rowsPerPage: 5,
-//       //sortField: '',
-//       sortOrder: 'code_id',
-//       //filterField: 'name',
-//       //filterValue: '',
-//     },
-//   })
-//   .then(res => {
-//     codeList.data = res.data;
-//     console.log(res.data);
-//     //console.table(codeList.data);
-
-//     for (let i = 0; i < 1; i++) {
-//       rows2.data = rows2.data.concat(
-//         codeList.data.slice(0).map(r => ({ ...r })),
-//       );
-//     }
-//     rows2.data.forEach((row, index) => {
-//       row.index = index;
-//     });
-//   });
-///////////////////////////////////////////////////////////////////////
-// const param = {
-//     codeId: codeId.value,
-//     codeValue: codeValue.value,
-//     codeName: codeName.value,
-//     codeDesc: codeDesc.value,
-//     creatId: 'ani',
-//   };
-//   const idx = 1;
-//   axios.post('/api/saveCode/' + idx, { param }).then(res => {
-//     console.log(res.data);
-//   });
 
 const columns = [
   {
