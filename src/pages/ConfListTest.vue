@@ -1,4 +1,5 @@
 <template>
+  <q-table :rows="rows" :columns="columns" />
   <div class="q-pa-md q-gutter-sm">
     <q-btn label="Alert" color="primary" @click="aaa" />
   </div>
@@ -10,6 +11,31 @@ import { ref, onMounted, reactive } from 'vue';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+const rows = ref([
+  { name: 'Apple', isUsed: true },
+  { name: 'Banana', isUsed: false },
+  { name: 'Cherry', isUsed: true },
+]);
+
+const columns = [
+  {
+    name: 'name',
+    required: true,
+    label: 'Fruit',
+    field: 'name',
+    align: 'left',
+  },
+  {
+    name: 'isUsed',
+    required: true,
+    label: 'Used',
+    field: 'isUsed',
+    align: 'center',
+    format: val => (val ? 'Yes' : 'No'),
+  },
+];
+
 function aaa() {
   /* documentDefinition : pdf파일에 들어갈 내용 및 여러가지를 정의 */
   var documentDefinition = {

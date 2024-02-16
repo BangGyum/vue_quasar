@@ -17,6 +17,17 @@
       binary-state-sort
       @request="onRequest"
     >
+      <template v-slot:body-cell-DEL_YN="props">
+        <q-td :props="props">
+          <q-toggle
+            v-model="props.row.DEL_YN"
+            color="green"
+            checked-icon="check"
+            unchecked-icon="clear"
+            @input="toggleChanged(props.row)"
+          />
+        </q-td>
+      </template>
       <template v-slot:top-right>
         <q-select
           v-model="selectValue"
@@ -105,7 +116,7 @@ const rows = reactive({
 });
 
 function moveConfUpdate() {
-  console.log(selected.value[0]);
+  //console.log(selected.value[0]);
   codeStore.$patch({
     codeId: selected.value[0].CODE_ID,
     codeName: selected.value[0].CODE_NAME,
@@ -130,12 +141,12 @@ async function fetchFromServer(
     descendingFinal = 'asc';
   }
   console.log('-----------fetchFromServer');
-  console.log('sortBy:' + sortBy);
-  console.log('descending :' + descending);
-  console.log('filterName(onSelectValue) :' + onSelectValue);
-  console.log('filterValue(onFilterValue) :' + onFilterValue);
-  console.log('descendingFinal:' + descendingFinal);
-  console.log('/////-------fetchFromServer');
+  // console.log('sortBy:' + sortBy);
+  // console.log('descending :' + descending);
+  // console.log('filterName(onSelectValue) :' + onSelectValue);
+  // console.log('filterValue(onFilterValue) :' + onFilterValue);
+  // console.log('descendingFinal:' + descendingFinal);
+  // console.log('/////-------fetchFromServer');
   try {
     const response = await axios.post('/api/data', {
       params: {
@@ -187,7 +198,7 @@ function deleteOperation() {
   };
 
   axios.post('/api/deleteCode', { param }).then(res => {
-    console.log(res.data);
+    //console.log(res.data);
     if (res.data === '성공') {
       dialogValue.value = '성공';
       alert.value = true;
@@ -198,16 +209,15 @@ function deleteOperation() {
 }
 
 async function onRequest(props) {
-  console.log('--------------------진입');
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
   const onSelectValue = selectValue.value;
   const onFilterValue = filterValue.value;
   console.log('-----------onRequest');
-  console.log('page:' + page);
-  console.log('sortBy :' + sortBy);
-  console.log('selectValue(filterName):' + selectValue.value);
-  console.log('filterValue:' + onFilterValue);
-  console.log('/////-------onRequest');
+  // console.log('page:' + page);
+  // console.log('sortBy :' + sortBy);
+  // console.log('selectValue(filterName):' + selectValue.value);
+  // console.log('filterValue:' + onFilterValue);
+  // console.log('/////-------onRequest');
 
   loading.value = true;
 
@@ -244,6 +254,12 @@ async function onRequest(props) {
   }
 }
 
+function toggleChanged(row) {
+  console.log(row);
+  // 여기에서 row.DEL_YN 값이 변경되었을 때의 처리를 작성합니다.
+  // 예를 들어, 서버에 업데이트를 요청하는 등의 코드를 작성할 수 있습니다.
+}
+
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
@@ -277,6 +293,13 @@ const columns = [
     field: 'CODE_NAME',
     sortable: true,
   },
+  {
+    name: 'DEL_YN',
+    label: 'DEL_YN',
+    field: 'DEL_YN',
+    align: 'center',
+    format: val => (val === 'Y' ? 'Yes' : 'No'),
+  },
   { name: 'CODE_DESC', label: 'CODE_DESC ', field: 'CODE_DESC' },
 
   { name: 'CREATE_ID', label: 'CREATE_ID ', field: 'CREATE_ID' },
@@ -296,8 +319,6 @@ const columns = [
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
 ];
-
-console.log(columns.name);
 </script>
 <style lang="sass">
 .my-sticky-header-table
