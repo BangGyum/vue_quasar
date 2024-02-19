@@ -17,14 +17,15 @@
       binary-state-sort
       @request="onRequest"
     >
-      <template v-slot:body-cell-DEL_YN="props">
+      <template v-slot:body-cell-isDel="props">
         <q-td :props="props">
           <q-toggle
-            v-model="props.row.DEL_YN"
+            v-model="props.row.isDel"
             color="green"
             checked-icon="check"
             unchecked-icon="clear"
-            @input="toggleChanged(props.row)"
+            @update:modelValue="toggleChanged(props.row)"
+            @click="clickE(props.row.isDel)"
           />
         </q-td>
       </template>
@@ -66,7 +67,13 @@
       </q-card-section>
 
       <q-card-actions align="left">
-        <q-btn flat label="Yes baby" color="primary" v-close-popup />
+        <q-btn
+          flat
+          label="Yes baby"
+          color="primary"
+          v-close-popup
+          @click="deleteOperation()"
+        />
         <q-btn flat label="NO" color="primary" v-close-popup />
       </q-card-actions>
     </q-card>
@@ -75,10 +82,14 @@
 
 <script setup>
 import axios from 'axios';
-import { reactive, ref, computed, nextTick, onMounted } from 'vue';
+import { reactive, ref, computed, nextTick, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
+
+const aaaa = ref(true);
+
+//const watchIsDel = ref(props.row.isDel === 'true');
 
 const codeStore = useCodeStore();
 const router = useRouter();
@@ -160,7 +171,15 @@ async function fetchFromServer(
       },
     });
     //console.log('오류안난듯');
-    //console.log(response.data);
+    for (let index in response.data) {
+      console.log(response.data[index]);
+      const row = response.data[index];
+      if (row.DEL_YN === 'N') {
+        response.data[index].isDel = false;
+      } else {
+        response.data[index].isDel = true;
+      }
+    }
     return response.data;
   } catch (error) {
     console.error(error);
@@ -192,9 +211,9 @@ function deleteClick() {
 }
 function deleteOperation() {
   const param = {
-    codeId: codeId.value,
-    codeValue: codeValue.value,
-    updateId: 'aniUpdate',
+    codeId: selected.value[0].CODE_ID,
+    codeValue: selected.value[0].CODE_VALUE,
+    updateId: 'aniDelete',
   };
 
   axios.post('/api/deleteCode', { param }).then(res => {
@@ -255,9 +274,18 @@ async function onRequest(props) {
 }
 
 function toggleChanged(row) {
-  console.log(row);
+  //  row.DEL_YN = 'AAA';
+  row.DEL_YN = row.isDel ? 'Y' : 'N';
+  console.log(row.CODE_ID);
+  console.log(row.isDel);
+  console.log(row.DEL_YN);
   // 여기에서 row.DEL_YN 값이 변경되었을 때의 처리를 작성합니다.
   // 예를 들어, 서버에 업데이트를 요청하는 등의 코드를 작성할 수 있습니다.
+}
+
+function clickE(a) {
+  console.log('-----clickE');
+  console.log(a);
 }
 
 onMounted(() => {
@@ -294,11 +322,11 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'DEL_YN',
-    label: 'DEL_YN',
-    field: 'DEL_YN',
+    name: 'isDel',
+    label: 'isDel',
+    field: 'isDel',
     align: 'center',
-    format: val => (val === 'Y' ? 'Yes' : 'No'),
+    //format: val => (val === 'Y' ? 'true' : 'false'),
   },
   { name: 'CODE_DESC', label: 'CODE_DESC ', field: 'CODE_DESC' },
 
