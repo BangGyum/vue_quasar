@@ -78,6 +78,31 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+  <div class="q-pa-md q-gutter-sm">
+    <q-btn label="Alert" color="primary" @click="showAlert" />
+
+    <q-dialog v-model="alert">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Alert</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          {{ dialogValue }}
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="OK"
+            color="primary"
+            v-close-popup
+            @click="goList"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
 </template>
 
 <script setup>
@@ -87,7 +112,7 @@ import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
 
-const aaaa = ref(true);
+const isSubmitting = ref(false); // 요청을 보내는 동안 true로 설정
 
 //const watchIsDel = ref(props.row.isDel === 'true');
 
@@ -210,21 +235,34 @@ function deleteClick() {
   confirm.value = true;
 }
 function deleteOperation() {
-  const param = {
-    codeId: selected.value[0].CODE_ID,
-    codeValue: selected.value[0].CODE_VALUE,
-    updateId: 'aniDelete',
-  };
+  if (isSubmitting.value === false) {
+    const param = {
+      codeId: selected.value[0].CODE_ID,
+      codeValue: selected.value[0].CODE_VALUE,
+      updateId: 'aniDelete',
+    };
+    submit();
 
-  axios.post('/api/deleteCode', { param }).then(res => {
-    //console.log(res.data);
-    if (res.data === '성공') {
-      dialogValue.value = '성공';
-      alert.value = true;
-    } else {
-      console.log('실패');
-    }
-  });
+    const submit = async () => {
+      isSubmitting.value = true;
+
+      try {
+        const res = await axios.post('/api/delYnChange', { param });
+
+        if (res.data === '성공') {
+          console.log('변경 성공');
+        } else {
+          console.log('실패');
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        isSubmitting.value = false;
+      }
+    };
+  } else {
+    console.log('isSubmitting.value === true');
+  }
 }
 
 async function onRequest(props) {
@@ -281,6 +319,23 @@ function toggleChanged(row) {
   console.log(row.DEL_YN);
   // 여기에서 row.DEL_YN 값이 변경되었을 때의 처리를 작성합니다.
   // 예를 들어, 서버에 업데이트를 요청하는 등의 코드를 작성할 수 있습니다.
+  const param = {
+    codeId: row.CODE_ID,
+    codeValue: row.CODE_VALUE,
+    delYn: row.DEL_YN,
+    updateId: 'aniDelete',
+  };
+
+  axios.post('/api/delYnChange', { param }).then(res => {
+    //console.log(res.data);
+    if (res.data === '성공') {
+      //dialogValue.value = '성공';
+      //alert.value = true;
+      console.log('변경 성공');
+    } else {
+      console.log('실패');
+    }
+  });
 }
 
 function clickE(a) {
