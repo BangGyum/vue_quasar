@@ -63,7 +63,11 @@
     {{ pagination.rowsNumber / pagination.rowsPerPage }}
     <q-pagination
       v-model="pagination.page"
-      :max="pagination.rowsNumber / pagination.rowsPerPage"
+      :max="
+        pagination.rowsPerPage
+          ? Math.ceil(pagination.rowsNumber / pagination.rowsPerPage)
+          : 0
+      "
       direction-links
       @update:modelValue="pageNumClick"
     />
@@ -260,7 +264,6 @@ async function fetchFromServer(
     });
     //console.log('오류안난듯');
     for (let index in response.data) {
-      console.log(response.data[index]);
       const row = response.data[index];
       if (row.DEL_YN === 'N') {
         response.data[index].isDel = false;
@@ -343,6 +346,7 @@ function deleteOperation() {
 }
 
 async function pageNumClick(newPage) {
+  console.log(pagination.value);
   const { rowsPerPage, sortBy, descending } = pagination.value;
   const onSelectValue = selectValue.value;
   const onFilterValue = filterValue.value;
