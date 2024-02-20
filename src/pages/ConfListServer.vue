@@ -25,7 +25,6 @@
             checked-icon="check"
             unchecked-icon="clear"
             @update:modelValue="toggleChanged(props.row)"
-            @click="clickE(props.row.isDel)"
           />
         </q-td>
       </template>
@@ -66,6 +65,7 @@
       v-model="pagination.page"
       :max="pagination.rowsNumber / pagination.rowsPerPage"
       direction-links
+      @update:modelValue="pageNumClick"
     />
   </div>
 
@@ -342,6 +342,55 @@ function deleteOperation() {
   }
 }
 
+async function pageNumClick(newPage) {
+  const { rowsPerPage, sortBy, descending } = pagination.value;
+  const onSelectValue = selectValue.value;
+  const onFilterValue = filterValue.value;
+  console.log('-----------onRequest');
+  console.log('rowsPerPage: ' + rowsPerPage);
+
+  loading.value = true;
+  const fetchCount =
+    rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
+  const startRow = (newPage - 1) * rowsPerPage;
+
+  console.log('fetchCount: ' + fetchCount);
+
+  try {
+    pagination.value.rowsNumber = await getRowsNumberCount(
+      startRow,
+      fetchCount,
+      onSelectValue,
+      onFilterValue,
+      sortBy,
+      descending,
+    );
+
+    const returnedData = await fetchFromServer(
+      startRow,
+      fetchCount,
+      onSelectValue,
+      onFilterValue,
+      sortBy,
+      descending,
+    );
+
+    console.log(returnedData);
+    // if (!Array.isArray(rows.value)) {
+    //   rows.value = [];
+    // }
+    rows.data.splice(0, rows.data.length, ...returnedData);
+
+    pagination.value.page = newPage;
+    pagination.value.rowsPerPage = rowsPerPage;
+    pagination.value.sortBy = sortBy;
+    pagination.value.descending = descending;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+}
 function toggleChanged(row) {
   //  row.DEL_YN = 'AAA';
   row.DEL_YN = row.isDel ? 'Y' : 'N';
@@ -367,11 +416,6 @@ function toggleChanged(row) {
       console.log('실패');
     }
   });
-}
-
-function clickE(a) {
-  console.log('-----clickE');
-  console.log(a);
 }
 
 onMounted(() => {
