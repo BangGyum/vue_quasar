@@ -29,6 +29,9 @@
           />
         </q-td>
       </template>
+
+      <template v-slot:bottom-left> </template>
+
       <template v-slot:top-right>
         <q-select
           v-model="selectValue"
@@ -36,11 +39,11 @@
           label="Standard"
           style="width: 200px"
         />
-        <q-btn color="secondary" label="Update" @click="moveConfUpdate" />
+        <q-btn color="secondary" label="Update" @click="updateBtnClick" />
         <q-btn
           style="background: #ff0080; color: white"
           label="Delete"
-          @click="deleteClick"
+          @click="deleteBtnClick"
         />
         <q-input
           borderless
@@ -56,6 +59,16 @@
       </template>
     </q-table>
   </div>
+
+  <div class="q-pa-lg flex flex-center">
+    {{ pagination.rowsNumber / pagination.rowsPerPage }}
+    <q-pagination
+      v-model="pagination.page"
+      :max="pagination.rowsNumber / pagination.rowsPerPage"
+      direction-links
+    />
+  </div>
+
   <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
@@ -112,6 +125,10 @@ import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
 
+const current = ref(3);
+
+let rowAllCount = ref(getRowsNumberCount('', ''));
+
 const isSubmitting = ref(false); // 요청을 보내는 동안 true로 설정
 
 //const watchIsDel = ref(props.row.isDel === 'true');
@@ -128,12 +145,11 @@ const selected = ref([]);
 
 const tableRef = ref();
 const filterValue = ref('');
-const options = reactive([
+const options = ref([
+  //select 옵션, db에서 긁어야함
   'CODE_ID',
   'CODE_VALUE',
   'CODE_NAME',
-  'Apple',
-  'Oracle',
 ]);
 const loading = ref(false);
 const pagination = ref({
@@ -144,6 +160,8 @@ const pagination = ref({
   rowsNumber: 10,
 });
 
+pagination.value.rowsNumber = getRowsNumberCount('필터컬럼명', '필터데이터');
+
 const model = ref(null);
 
 const rows = reactive({
@@ -151,16 +169,61 @@ const rows = reactive({
   data: [],
 });
 
-function moveConfUpdate() {
-  //console.log(selected.value[0]);
-  codeStore.$patch({
-    codeId: selected.value[0].CODE_ID,
-    codeName: selected.value[0].CODE_NAME,
-    codeValue: selected.value[0].CODE_VALUE,
-    codeDesc: selected.value[0].CODE_DESC,
-  });
-  router.push('/confUpdate');
+async function onRequest(props) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  const onSelectValue = selectValue.value;
+  const onFilterValue = filterValue.value;
+  console.log('-----------onRequest');
+  console.log('rowsPerPage: ' + rowsPerPage);
+  // console.log('page:' + page);
+  // console.log('sortBy :' + sortBy);
+  // console.log('selectValue(filterName):' + selectValue.value);
+  // console.log('filterValue:' + onFilterValue);
+  // console.log('/////-------onRequest');
+
+  loading.value = true;
+  const fetchCount =
+    rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
+  const startRow = (page - 1) * rowsPerPage;
+
+  console.log('fetchCount: ' + fetchCount);
+
+  try {
+    pagination.value.rowsNumber = await getRowsNumberCount(
+      startRow,
+      fetchCount,
+      onSelectValue,
+      onFilterValue,
+      sortBy,
+      descending,
+    );
+
+    const returnedData = await fetchFromServer(
+      startRow,
+      fetchCount,
+      onSelectValue,
+      onFilterValue,
+      sortBy,
+      descending,
+    );
+
+    console.log(returnedData);
+    // if (!Array.isArray(rows.value)) {
+    //   rows.value = [];
+    // }
+    rows.data.splice(0, rows.data.length, ...returnedData);
+
+    pagination.value.page = page;
+    pagination.value.rowsPerPage = rowsPerPage;
+    pagination.value.sortBy = sortBy;
+    pagination.value.descending = descending;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
 }
+
 let descendingFinal = '';
 //페이징
 async function fetchFromServer(
@@ -211,10 +274,13 @@ async function fetchFromServer(
     return [];
   }
 }
-
-pagination.value.rowsNumber = getRowsNumberCount('필터컬럼명', '필터데이터');
-
 async function getRowsNumberCount(filterName, filterValue) {
+  //  startRow,
+  // rowsPerPage,
+  // onSelectValue,
+  // onFilterValue,
+  // sortBy,
+  // descending,
   try {
     const response = await axios.get('/api/getConfigCount', {
       params: {
@@ -231,7 +297,18 @@ async function getRowsNumberCount(filterName, filterValue) {
   }
 }
 
-function deleteClick() {
+function updateBtnClick() {
+  //console.log(selected.value[0]);
+  codeStore.$patch({
+    codeId: selected.value[0].CODE_ID,
+    codeName: selected.value[0].CODE_NAME,
+    codeValue: selected.value[0].CODE_VALUE,
+    codeDesc: selected.value[0].CODE_DESC,
+  });
+  router.push('/confUpdate');
+}
+
+function deleteBtnClick() {
   confirm.value = true;
 }
 function deleteOperation() {
@@ -262,52 +339,6 @@ function deleteOperation() {
     };
   } else {
     console.log('isSubmitting.value === true');
-  }
-}
-
-async function onRequest(props) {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination;
-  const onSelectValue = selectValue.value;
-  const onFilterValue = filterValue.value;
-  console.log('-----------onRequest');
-  // console.log('page:' + page);
-  // console.log('sortBy :' + sortBy);
-  // console.log('selectValue(filterName):' + selectValue.value);
-  // console.log('filterValue:' + onFilterValue);
-  // console.log('/////-------onRequest');
-
-  loading.value = true;
-
-  try {
-    pagination.value.rowsNumber = await getRowsNumberCount(
-      '일단 임시 필터데이터',
-    );
-    const fetchCount =
-      rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
-    const startRow = (page - 1) * rowsPerPage;
-    const returnedData = await fetchFromServer(
-      startRow,
-      fetchCount,
-      onSelectValue,
-      onFilterValue,
-      sortBy,
-      descending,
-    );
-
-    console.log(returnedData);
-    // if (!Array.isArray(rows.value)) {
-    //   rows.value = [];
-    // }
-    rows.data.splice(0, rows.data.length, ...returnedData);
-
-    pagination.value.page = page;
-    pagination.value.rowsPerPage = rowsPerPage;
-    pagination.value.sortBy = sortBy;
-    pagination.value.descending = descending;
-  } catch (error) {
-    console.error(error);
-  } finally {
-    loading.value = false;
   }
 }
 
@@ -349,9 +380,9 @@ onMounted(() => {
 
 const columns = [
   {
-    name: 'index',
-    label: '#',
-    field: 'index',
+    name: 'RowNum',
+    label: 'RowNum',
+    field: 'RowNum',
   },
   {
     name: 'CODE_ID',
