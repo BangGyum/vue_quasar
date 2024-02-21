@@ -71,19 +71,6 @@ function onReset() {
   codeDesc.value = null;
   accept.value = false;
 }
-function onConsoleLog() {
-  const param = {
-    codeId: codeId.value,
-    codeValue: codeValue.value,
-    codeName: codeName.value,
-    codeDesc: codeDesc.value,
-    creatId: 'ani',
-  };
-  const idx = 1;
-  axios.post('/api/savecode/' + idx, { param }).then(res => {
-    console.log(res.data);
-  });
-}
 
 function tableDoubleClick(evt, row, index) {
   console.table(row);

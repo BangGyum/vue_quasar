@@ -90,8 +90,7 @@ function onSubmit() {
     codeDesc: codeDesc.value,
     creatId: 'ani',
   };
-  const idx = 1;
-  axios.post('/api/saveCode/' + idx, { param }).then(res => {
+  axios.post('/api/insert', { param }).then(res => {
     console.log(res.data);
   });
 }

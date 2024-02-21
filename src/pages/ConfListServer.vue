@@ -244,12 +244,6 @@ async function fetchFromServer(
     descendingFinal = 'asc';
   }
   console.log('-----------fetchFromServer');
-  // console.log('sortBy:' + sortBy);
-  // console.log('descending :' + descending);
-  // console.log('filterName(onSelectValue) :' + onSelectValue);
-  // console.log('filterValue(onFilterValue) :' + onFilterValue);
-  // console.log('descendingFinal:' + descendingFinal);
-  // console.log('/////-------fetchFromServer');
   try {
     const response = await axios.post('/api/data', {
       params: {
