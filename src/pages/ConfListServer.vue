@@ -72,7 +72,7 @@
       @update:modelValue="pageNumClick"
     />
   </div>
-
+  <q-btn @click="addRow">Add row</q-btn>
   <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
@@ -403,22 +403,47 @@ function toggleChanged(row) {
     delYn: row.DEL_YN,
     updateId: 'aniDelete',
   };
-
-  axios.post('/api/delYnChange', { param }).then(res => {
-    //console.log(res.data);
-    if (res.data === '성공') {
-      //dialogValue.value = '성공';
-      //alert.value = true;
-      console.log('변경 성공');
-    } else {
-      console.log('실패');
-    }
-  });
+  try {
+    axios.post('/api/delYnChange', { param }).then(res => {
+      //console.log(res.data);
+      if (res.data === '성공') {
+        //dialogValue.value = '성공';
+        //alert.value = true;
+        console.log('변경 성공');
+      } else {
+        console.log('실패');
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    console.log('finally');
+  }
 }
 
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
+
+function addRow() {
+  //새 데이터 추가
+  const newRow = {
+    RowNum: '',
+    CODE_ID: '',
+    CODE_VALUE: '',
+    CODE_NAME: '',
+    CODE_DESC: '',
+    DEL_YN: '',
+    CREATE_DT: '',
+    UPDATE_DT: '',
+    CREATE_ID: '',
+    UPDATE_ID: '',
+    isDel: true,
+  }; // 새 행 데이터
+  console.log(rows.data);
+  rows.data.unshift(newRow); // 새 행을 맨 위에 추가
+  //pagination.value.rowsNumber++; // 총 행 수 증가
+}
 
 const columns = [
   {
