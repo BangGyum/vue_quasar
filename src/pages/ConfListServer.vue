@@ -128,34 +128,25 @@ import { reactive, ref, computed, nextTick, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
+const router = useRouter();
 
-const current = ref(3);
-
-let rowAllCount = ref(getRowsNumberCount('', ''));
+const showAlert = ref(false);
 
 const isSubmitting = ref(false); // 요청을 보내는 동안 true로 설정
 
-//const watchIsDel = ref(props.row.isDel === 'true');
-
 const codeStore = useCodeStore();
-const router = useRouter();
 
-const selectValue = ref('');
+const selectValue = ref(''); //select 보이는 곳 변수
 
-const confirm = ref(false);
+const selected = ref([]); //select 목록
+
+const confirm = ref(false); //삭제팝업 true = 팝업표출
 const deleteMessage = '해당 데이터를 삭제 하시겠습니까?';
-
-const selected = ref([]);
 
 const tableRef = ref();
 const filterValue = ref('');
-const options = ref([
-  //select 옵션, db에서 긁어야함
-  'CODE_ID',
-  'CODE_VALUE',
-  'CODE_NAME',
-]);
-const loading = ref(false);
+
+const loading = ref(false); //로딩 모션
 const pagination = ref({
   sortBy: 'CODE_ID',
   descending: 'false',
@@ -389,14 +380,9 @@ async function pageNumClick(newPage) {
     loading.value = false;
   }
 }
-function toggleChanged(row) {
-  //  row.DEL_YN = 'AAA';
+async function toggleChanged(row) {
   row.DEL_YN = row.isDel ? 'Y' : 'N';
-  console.log(row.CODE_ID);
-  console.log(row.isDel);
-  console.log(row.DEL_YN);
-  // 여기에서 row.DEL_YN 값이 변경되었을 때의 처리를 작성합니다.
-  // 예를 들어, 서버에 업데이트를 요청하는 등의 코드를 작성할 수 있습니다.
+
   const param = {
     codeId: row.CODE_ID,
     codeValue: row.CODE_VALUE,
@@ -404,25 +390,30 @@ function toggleChanged(row) {
     updateId: 'aniDelete',
   };
   try {
-    axios.post('/api/delYnChange', { param }).then(res => {
-      //console.log(res.data);
-      if (res.data === '성공') {
-        //dialogValue.value = '성공';
-        //alert.value = true;
-        console.log('변경 성공');
-      } else {
-        console.log('실패');
-      }
-    });
+    //
+    const res = await axios.post('/api/delYnChange', { param }); // await 키워드 추가
+    if (res.data === '성공') {
+      console.log('변경 성공');
+    } else {
+      console.log('실패');
+    }
   } catch (error) {
-    console.error(error);
+    if (error.response.status === 500) {
+      console.log('500 Error');
+      if (row.DEL_YN === 'Y') {
+        row.DEL_YN = 'N';
+      } else {
+        row.DEL_YN = 'Y';
+      }
+    }
   } finally {
     console.log('finally');
   }
 }
 
 onMounted(() => {
-  tableRef.value.requestServerInteraction();
+  //DOM에 마운트 된 직후 호출
+  tableRef.value.requestServerInteraction(); //Qtable의 서버모드 작동, request와 관련있는것으로 추측.
 });
 
 function addRow() {
@@ -443,6 +434,23 @@ function addRow() {
   console.log(rows.data);
   rows.data.unshift(newRow); // 새 행을 맨 위에 추가
   //pagination.value.rowsNumber++; // 총 행 수 증가
+}
+
+function alert() {
+  $q.dialog({
+    dark: true,
+    title: 'Alert',
+    message: 'Some message',
+  })
+    .onOk(() => {
+      // console.log('OK')
+    })
+    .onCancel(() => {
+      // console.log('Cancel')
+    })
+    .onDismiss(() => {
+      // console.log('I am triggered on both OK and Cancel')
+    });
 }
 
 const columns = [
@@ -500,6 +508,13 @@ const columns = [
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
 ];
+
+const options = ref(
+  //select 옵션, db에서 긁어야함
+  columns
+    .filter(columns => columns.name !== 'RowNum' && columns.name !== 'isDel')
+    .map(columns => columns.name),
+);
 </script>
 <style lang="sass">
 .my-sticky-header-table
