@@ -1,4 +1,40 @@
 <template>
+  <div class="q-gutter-y-md column" style="max-width: 300px">
+    <q-select
+      v-model="selectValue"
+      :options="options"
+      label="Standard"
+      style="width: 200px"
+    />
+    <q-input
+      outlined
+      bottom-slots
+      v-model="filterValue"
+      label="Label"
+      counter
+      maxlength="12"
+      :dense="dense"
+    >
+      <template v-slot:before>
+        <label></label>
+      </template>
+
+      <template v-slot:append>
+        <!-- <q-icon
+          v-if="text !== ''"
+          name="close"
+          @click="text = ''"
+          class="cursor-pointer"
+        />
+        <q-icon name="search" @click="inputClick" /> -->
+      </template>
+
+      <template v-slot:hint> Field hint </template>
+      <template v-slot:after>
+        <q-btn round dense flat icon="send" @click="inputClick" />
+      </template>
+    </q-input>
+  </div>
   <div class="q-pa-md">
     <q-table
       class="my-sticky-header-table"
@@ -13,7 +49,7 @@
       v-model:selected="selected"
       selection="single"
       :loading="loading"
-      :filter="filterValue"
+      :filter="filterValue99999999999999999999999999999999999999"
       binary-state-sort
       @request="onRequest"
     >
@@ -37,6 +73,7 @@
           :options="options"
           label="Standard"
           style="width: 200px"
+          @update:modelValue="selectChange()"
         />
         <q-btn color="secondary" label="Update" @click="updateBtnClick" />
         <q-btn
@@ -130,6 +167,9 @@ import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
+const filterValue99999999999999999999999999999999999999 = ref('');
+const dense = ref(false);
+
 const showAlert = ref(false);
 
 const isSubmitting = ref(false); // 요청을 보내는 동안 true로 설정
@@ -157,8 +197,6 @@ const pagination = ref({
 
 pagination.value.rowsNumber = getRowsNumberCount('필터컬럼명', '필터데이터');
 
-const model = ref(null);
-
 const rows = reactive({
   //table에 직접 들어갈
   data: [],
@@ -169,7 +207,7 @@ async function onRequest(props) {
   const onSelectValue = selectValue.value;
   const onFilterValue = filterValue.value;
   console.log('-----------onRequest');
-  console.log('rowsPerPage: ' + rowsPerPage);
+  //console.log('rowsPerPage: ' + rowsPerPage);
   // console.log('page:' + page);
   // console.log('sortBy :' + sortBy);
   // console.log('selectValue(filterName):' + selectValue.value);
@@ -181,7 +219,7 @@ async function onRequest(props) {
     rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
   const startRow = (page - 1) * rowsPerPage;
 
-  console.log('fetchCount: ' + fetchCount);
+  //console.log('fetchCount: ' + fetchCount);
 
   try {
     pagination.value.rowsNumber = await getRowsNumberCount(
@@ -331,19 +369,18 @@ function deleteOperation() {
 }
 
 async function pageNumClick(newPage) {
-  console.log(pagination.value);
   const { rowsPerPage, sortBy, descending } = pagination.value;
   const onSelectValue = selectValue.value;
   const onFilterValue = filterValue.value;
-  console.log('-----------onRequest');
-  console.log('rowsPerPage: ' + rowsPerPage);
+  console.log('-----------pageNumClick');
+  //console.log('rowsPerPage: ' + rowsPerPage);
 
   loading.value = true;
   const fetchCount =
     rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
   const startRow = (newPage - 1) * rowsPerPage;
 
-  console.log('fetchCount: ' + fetchCount);
+  //console.log('fetchCount: ' + fetchCount);
 
   try {
     pagination.value.rowsNumber = await getRowsNumberCount(
@@ -364,7 +401,7 @@ async function pageNumClick(newPage) {
       descending,
     );
 
-    console.log(returnedData);
+    //console.log(returnedData);
     // if (!Array.isArray(rows.value)) {
     //   rows.value = [];
     // }
@@ -411,6 +448,62 @@ async function toggleChanged(row) {
   }
 }
 
+function selectChange() {
+  console.log('select 변경 감지');
+  filterValue.value = '';
+}
+
+async function inputClick() {
+  console.log('검색버튼 활성');
+  //console.log(pagination.value);
+  const { page, rowsPerPage, sortBy, descending } = pagination.value;
+  const onSelectValue = selectValue.value;
+  const onFilterValue = filterValue.value;
+  //console.log('rowsPerPage: ' + rowsPerPage);
+
+  loading.value = true;
+  const fetchCount =
+    rowsPerPage === 0 ? pagination.value.rowsNumber : rowsPerPage;
+  const startRow = (page - 1) * rowsPerPage;
+
+  //console.log('fetchCount: ' + fetchCount);
+
+  try {
+    pagination.value.rowsNumber = await getRowsNumberCount(
+      startRow,
+      fetchCount,
+      onSelectValue,
+      onFilterValue,
+      sortBy,
+      descending,
+    );
+
+    const returnedData = await fetchFromServer(
+      startRow,
+      fetchCount,
+      onSelectValue,
+      onFilterValue,
+      sortBy,
+      descending,
+    );
+
+    //console.log(returnedData);
+    // if (!Array.isArray(rows.value)) {
+    //   rows.value = [];
+    // }
+    rows.data.splice(0, rows.data.length, ...returnedData);
+
+    pagination.value.page = page;
+    pagination.value.rowsPerPage = rowsPerPage;
+    pagination.value.sortBy = sortBy;
+    pagination.value.descending = descending;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+}
+
 onMounted(() => {
   //DOM에 마운트 된 직후 호출
   tableRef.value.requestServerInteraction(); //Qtable의 서버모드 작동, request와 관련있는것으로 추측.
@@ -431,7 +524,7 @@ function addRow() {
     UPDATE_ID: '',
     isDel: true,
   }; // 새 행 데이터
-  console.log(rows.data);
+  //console.log(rows.data);
   rows.data.unshift(newRow); // 새 행을 맨 위에 추가
   //pagination.value.rowsNumber++; // 총 행 수 증가
 }
