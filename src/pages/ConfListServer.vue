@@ -1,18 +1,34 @@
 <template>
+  <div class="q-pa-md q-gutter-sm">
+    <q-dialog v-model="dialog" :position="position">
+      <q-card style="width: 350px">
+        <q-linear-progress :value="0.6" color="pink" />
+
+        <q-card-section class="row items-center no-wrap">
+          <div>
+            <div class="text-weight-bold">검색조건을 확인해주세요</div>
+            <!-- <div class="text-grey">Fitz & The Tantrums</div> -->
+          </div>
+
+          <q-space />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+  </div>
   <div class="q-gutter-y-md column" style="max-width: 300px">
     <q-select
       v-model="selectValue"
       :options="options"
-      label="Standard"
+      label="컬럼명"
       style="width: 200px"
     />
     <q-input
       outlined
       bottom-slots
       v-model="filterValue"
-      label="Label"
+      label="컬럼조건"
       counter
-      maxlength="12"
+      maxlength="20"
       :dense="dense"
     >
       <template v-slot:before>
@@ -34,6 +50,12 @@
         <q-btn round dense flat icon="send" @click="inputClick" />
       </template>
     </q-input>
+    <q-btn
+      color="white"
+      text-color="black"
+      label="초기화"
+      @click="resetClick"
+    />
   </div>
   <div class="q-pa-md">
     <q-table
@@ -170,6 +192,8 @@ const router = useRouter();
 const filterValue99999999999999999999999999999999999999 = ref('');
 const dense = ref(false);
 
+const dialog = ref(false);
+const position = ref('top');
 const showAlert = ref(false);
 
 const isSubmitting = ref(false); // 요청을 보내는 동안 true로 설정
@@ -455,6 +479,14 @@ function selectChange() {
 
 async function inputClick() {
   console.log('검색버튼 활성');
+  if (selectValue.value === '' || filterValue.value === '') {
+    //confirm.value = true;
+    position.value = 'top';
+    dialog.value = true;
+    setTimeout(() => {
+      dialog.value = false;
+    }, 1000);
+  }
   //console.log(pagination.value);
   const { page, rowsPerPage, sortBy, descending } = pagination.value;
   const onSelectValue = selectValue.value;
@@ -544,6 +576,12 @@ function alert() {
     .onDismiss(() => {
       // console.log('I am triggered on both OK and Cancel')
     });
+}
+
+function resetClick() {
+  selectValue.value = '';
+  filterValue.value = '';
+  rows.data = [];
 }
 
 const columns = [
