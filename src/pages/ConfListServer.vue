@@ -1,5 +1,10 @@
 <template>
-  <div class="q-pa-md q-gutter-sm">
+  <div class="row">
+    <div>First column</div>
+    <div>Second column</div>
+    <div>Third column</div>
+  </div>
+  <div class="row items-center q-pa-md">
     <q-dialog v-model="dialog" :position="position">
       <q-card style="width: 350px">
         <q-linear-progress :value="0.6" color="pink" />
@@ -14,14 +19,28 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-  </div>
-  <div class="q-gutter-y-md column" style="max-width: 300px">
+
     <q-select
+      filled
+      bottom-slots
       v-model="selectValue"
       :options="options"
       label="컬럼명"
-      style="width: 200px"
-    />
+      style="width: 220px"
+      counter
+      :dense="dense"
+      :options-dense="denseOpts"
+    >
+      <template v-slot:append>
+        <q-icon
+          name="close"
+          @click.stop.prevent="model = ''"
+          class="cursor-pointer"
+        />
+      </template>
+
+      <template v-slot:hint> Field hint </template>
+    </q-select>
     <q-input
       outlined
       bottom-slots
@@ -29,6 +48,7 @@
       label="컬럼조건"
       counter
       maxlength="20"
+      style="width: 280px"
       :dense="dense"
     >
       <template v-slot:before>
@@ -50,6 +70,8 @@
         <q-btn round dense flat icon="send" @click="inputClick" />
       </template>
     </q-input>
+  </div>
+  <div>
     <q-btn
       color="white"
       text-color="black"
