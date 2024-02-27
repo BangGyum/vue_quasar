@@ -32,7 +32,8 @@
       @update:modelValue="pageNumClick"
     />
   </div>
-
+  <q-btn round dense flat icon="send" @click="capture" />
+  <q-btn round dense flat icon="send" @click="createPdf" />
   <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
@@ -125,6 +126,13 @@ import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
 import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+const doc = new jsPDF({
+  orientation: 'p',
+  unit: 'mm',
+  format: 'a4',
+});
+
 import html2canvas from 'html2canvas';
 
 const lorem =
@@ -478,46 +486,127 @@ const columns = [
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
 ];
-setTimeout(
-  () =>
-    html2canvas(document.body).then(canvas => {
-      // 캔버스를 이미지로 변환
-      console.log(canvas);
-      const imgData = canvas.toDataURL('image/png'); // 캔버스를 이미지로 변환합니다. 이미지 형식은 PNG입니다.
+function capture() {
+  html2canvas(document.body).then(canvas => {
+    // 캔버스를 이미지로 변환
+    console.log(canvas);
+    const imgData = canvas.toDataURL('image/png'); // 캔버스를 이미지로 변환합니다. 이미지 형식은 PNG입니다.
 
-      // const imgWidth = 210; // 가로(mm) (A4)
-      // const pageHeight = imgWidth * 1.414; // 세로 길이 (A4)
-      // const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const imgWidth = 210; // 가로(mm) (A4)
-      const pageHeight = 210; //* 1.414; // 세로 길이 (A4)
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    // const imgWidth = 210; // 가로(mm) (A4)
+    // const pageHeight = imgWidth * 1.414; // 세로 길이 (A4)
+    // const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgWidth = 210; // 가로(mm) (A4)
+    const pageHeight = 210; //* 1.414; // 세로 길이 (A4)
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      const doc = new jsPDF({
-        orientation: 'p',
-        unit: 'mm',
-        format: 'a4',
-      });
+    const doc = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a4',
+    });
 
-      let heightLeft = imgHeight; //이미지가 여러 페이지일때, 각 페이지에서 이미지의 어디를 출력해야하는지
-      let position = 0; //이미지가 출력될 y 좌표
+    let heightLeft = imgHeight; //이미지가 여러 페이지일때, 각 페이지에서 이미지의 어디를 출력해야하는지
+    let position = 0; //이미지가 출력될 y 좌표
 
-      // 첫 페이지 출력
+    // 첫 페이지 출력
+    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // 한 페이지 이상일 경우 루프 돌면서 출력
+    while (heightLeft >= 20) {
+      // 남아있는 이미지 높이가 20mm 이상인 경우, 새 페이지를 추가하고 이미지를 계속 출력합니다.
+      position = heightLeft - imgHeight;
+      doc.addPage();
       doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
+    }
 
-      // 한 페이지 이상일 경우 루프 돌면서 출력
-      while (heightLeft >= 20) {
-        // 남아있는 이미지 높이가 20mm 이상인 경우, 새 페이지를 추가하고 이미지를 계속 출력합니다.
-        position = heightLeft - imgHeight;
-        doc.addPage();
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+    doc.save('capture.pdf');
+  });
+}
 
-      doc.save('capture.pdf');
-    }),
-  2000,
-);
+function createPdf() {
+  const doc = new jsPDF('landscape'); //  jsPDF는 기본적으로 좌표 체계를 포인트(pt)로 설정하므로, 1mm는 약 2.83pt입니다. 따라서 A4 크기의 문서에서 x 축의 범위는 대략 0에서 595pt입니다.  x 축의 범위는 0에서 210mm가 됩니다.
+  // 가운데 중앙에 제목 추가
+  doc.setFontSize(20);
+  doc.text('title', 150, 20, { align: 'center' }); //이라는 텍스트를 x 좌표 105, y 좌표 20의 위치에 가운데 정렬로 추가합니다.
+
+  // 왼쪽 중앙에 데이터 추가
+  doc.setFontSize(12);
+  doc.text('left', 20, 40);
+
+  // 오른쪽 중앙에 데이터 추가
+  doc.text('right', 270, 40);
+
+  // 테이블 추가
+  doc.autoTable({
+    startY: 50,
+    head: [
+      [
+        {
+          content: 'Name',
+          styles: {
+            halign: 'right',
+            cellWidth: 500,
+            fillColor: [255, 255, 255],
+            textColor: [0, 0, 0],
+          },
+        },
+        'Emaillllllllllllllllllllllllllllllllllllllllllllllllllllll',
+        'Country',
+      ],
+    ],
+    body: [
+      [
+        'Davidssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss',
+        'david@example.com',
+        'England',
+      ],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+    ],
+  });
+
+  // 두 번째 테이블 추가
+  doc.autoTable({
+    startY: doc.previousAutoTable.finalY + 20, // 이전 테이블 다음에 테이블을 추가
+    head: [['Name', 'Email', 'Country']],
+    body: [
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+    ],
+    columnStyles: {
+      Name: { cellWidth: 20 }, // 'Email' 컬럼의 너비를 50으로 설정
+    },
+  });
+
+  // 맨 아래에 페이지 번호 추가
+  const pageCount = doc.getNumberOfPages(); // 총 페이지 수
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.text('Page ' + String(i) + ' of ' + String(pageCount), 105, 285, {
+      align: 'center',
+    });
+  }
+
+  doc.save('table.pdf');
+}
 </script>
 <style lang="sass">
 .my-sticky-header-table
@@ -547,7 +636,7 @@ setTimeout(
     /* height of all previous header rows */
     scroll-margin-top: 48px
 
-    .my-card
+  .my-card
     width: 100%
     max-width: 250px
 </style>
