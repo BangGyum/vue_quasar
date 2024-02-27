@@ -547,38 +547,20 @@ function createPdf() {
           content: 'Name',
           styles: {
             halign: 'right',
-            cellWidth: 500,
+            cellWidth: 170,
             fillColor: [255, 255, 255],
             textColor: [0, 0, 0],
           },
         },
-        'Emaillllllllllllllllllllllllllllllllllllllllllllllllllllll',
+        'Email',
         'Country',
       ],
     ],
     body: [
-      [
-        'Davidssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss',
-        'david@example.com',
-        'England',
-      ],
-      ['John', 'john@example.com', 'USA'],
-      ['Jane', 'jane@example.com', 'France'],
       ['David', 'david@example.com', 'England'],
       ['John', 'john@example.com', 'USA'],
       ['Jane', 'jane@example.com', 'France'],
       ['David', 'david@example.com', 'England'],
-      ['John', 'john@example.com', 'USA'],
-      ['Jane', 'jane@example.com', 'France'],
-      ['David', 'david@example.com', 'England'],
-      ['John', 'john@example.com', 'USA'],
-      ['Jane', 'jane@example.com', 'France'],
-      ['David', 'david@example.com', 'England'],
-      ['John', 'john@example.com', 'USA'],
-      ['Jane', 'jane@example.com', 'France'],
-      ['David', 'david@example.com', 'England'],
-      ['John', 'john@example.com', 'USA'],
-      ['Jane', 'jane@example.com', 'France'],
     ],
   });
 
@@ -600,7 +582,7 @@ function createPdf() {
   const pageCount = doc.getNumberOfPages(); // 총 페이지 수
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.text('Page ' + String(i) + ' of ' + String(pageCount), 105, 285, {
+    doc.text('Page ' + String(i) + ' of ' + String(pageCount), 155, 200, {
       align: 'center',
     });
   }
