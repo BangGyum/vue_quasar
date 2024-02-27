@@ -80,6 +80,42 @@
       </q-card>
     </q-dialog>
   </div>
+
+  <div class="q-pa-md row items-start q-gutter-md">
+    <q-card class="my-card">
+      <q-card-section>
+        {{ lorem }}
+      </q-card-section>
+    </q-card>
+  </div>
+  <div class="q-pa-md row items-start q-gutter-md">
+    <q-card class="my-card">
+      <q-card-section>
+        {{ lorem }}
+      </q-card-section>
+    </q-card>
+  </div>
+  <div class="q-pa-md row items-start q-gutter-md">
+    <q-card class="my-card">
+      <q-card-section>
+        {{ lorem }}
+      </q-card-section>
+    </q-card>
+  </div>
+  <div class="q-pa-md row items-start q-gutter-md">
+    <q-card class="my-card">
+      <q-card-section>
+        {{ lorem }}
+      </q-card-section>
+    </q-card>
+  </div>
+  <div class="q-pa-md row items-start q-gutter-md">
+    <q-card class="my-card">
+      <q-card-section>
+        {{ lorem }}
+      </q-card-section>
+    </q-card>
+  </div>
 </template>
 
 <script setup>
@@ -88,10 +124,11 @@ import { reactive, ref, computed, nextTick, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCodeStore } from 'stores/codeStore';
 import { useRouter } from 'vue-router';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
-const current = ref(3);
-
-let rowAllCount = ref(getRowsNumberCount('', ''));
+const lorem =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
 
 const isSubmitting = ref(false); // 요청을 보내는 동안 true로 설정
 
@@ -441,6 +478,46 @@ const columns = [
     //sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
   },
 ];
+setTimeout(
+  () =>
+    html2canvas(document.body).then(canvas => {
+      // 캔버스를 이미지로 변환
+      console.log(canvas);
+      const imgData = canvas.toDataURL('image/png'); // 캔버스를 이미지로 변환합니다. 이미지 형식은 PNG입니다.
+
+      // const imgWidth = 210; // 가로(mm) (A4)
+      // const pageHeight = imgWidth * 1.414; // 세로 길이 (A4)
+      // const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const imgWidth = 210; // 가로(mm) (A4)
+      const pageHeight = 210; //* 1.414; // 세로 길이 (A4)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      let heightLeft = imgHeight; //이미지가 여러 페이지일때, 각 페이지에서 이미지의 어디를 출력해야하는지
+      let position = 0; //이미지가 출력될 y 좌표
+
+      // 첫 페이지 출력
+      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // 한 페이지 이상일 경우 루프 돌면서 출력
+      while (heightLeft >= 20) {
+        // 남아있는 이미지 높이가 20mm 이상인 경우, 새 페이지를 추가하고 이미지를 계속 출력합니다.
+        position = heightLeft - imgHeight;
+        doc.addPage();
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      doc.save('capture.pdf');
+    }),
+  2000,
+);
 </script>
 <style lang="sass">
 .my-sticky-header-table
@@ -469,4 +546,8 @@ const columns = [
   tbody
     /* height of all previous header rows */
     scroll-margin-top: 48px
+
+    .my-card
+    width: 100%
+    max-width: 250px
 </style>
