@@ -551,7 +551,7 @@ function createPdf() {
           content: 'Name',
           styles: {
             halign: 'right',
-            cellWidth: 170,
+            cellWidth: 140,
             fillColor: [255, 255, 255],
             textColor: [0, 0, 0],
           },
@@ -561,11 +561,23 @@ function createPdf() {
       ],
     ],
     body: [
+      [
+        'David',
+        'david@example.commmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
+        'England',
+      ],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
       ['David', 'david@example.com', 'England'],
       ['John', 'john@example.com', 'USA'],
       ['Jane', 'jane@example.com', 'France'],
       ['David', 'david@example.com', 'England'],
     ],
+
+    styles: { fontSize: 10 },
   });
 
   // 두 번째 테이블 추가
@@ -573,6 +585,12 @@ function createPdf() {
     startY: doc.previousAutoTable.finalY + 20, // 이전 테이블 다음에 테이블을 추가
     head: [['Name', 'Email', 'Country']],
     body: [
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
+      ['David', 'david@example.com', 'England'],
+      ['John', 'john@example.com', 'USA'],
+      ['Jane', 'jane@example.com', 'France'],
       ['David', 'david@example.com', 'England'],
       ['John', 'john@example.com', 'USA'],
       ['Jane', 'jane@example.com', 'France'],
@@ -586,7 +604,7 @@ function createPdf() {
   const pageCount = doc.getNumberOfPages(); // 총 페이지 수
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.text('Page ' + String(i) + ' of ' + String(pageCount), 155, 200, {
+    doc.text(' ' + String(i) + ' / ' + String(pageCount), 155, 200, {
       align: 'center',
     });
   }
@@ -594,6 +612,7 @@ function createPdf() {
   doc.save('table.pdf');
 }
 function createPdfmake() {
+  //pdfmake
   const docDefinition = {
     pageSize: 'A4',
     pageOrientation: 'landscape',
@@ -601,21 +620,34 @@ function createPdfmake() {
       {
         text: 'title',
         alignment: 'center',
-        fontSize: 20,
+        fontSize: 25,
         margin: [0, 20, 0, 40],
       },
       {
         columns: [
-          { text: 'left', alignment: 'left', fontSize: 12 },
-          { text: 'right', alignment: 'right', fontSize: 12 },
+          { text: 'left', alignment: 'left', fontSize: 15 },
+          { text: 'right', alignment: 'right', fontSize: 15 },
         ],
       },
       {
         table: {
           widths: [170, '*', '*'],
           body: [
-            [{ text: 'Name', alignment: 'right' }, 'Email', 'Country'],
-            ['David', 'david@example.com', 'England'],
+            [
+              {
+                text: 'Name',
+                alignment: 'right',
+                fillColor: 'gray',
+                color: 'white',
+              },
+              'Email',
+              'Country',
+            ],
+            [
+              'David',
+              'david@example.com,mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
+              'England',
+            ],
             ['John', 'john@example.com', 'USA'],
             ['Jane', 'jane@example.com', 'France'],
             ['David', 'david@example.com', 'England'],
@@ -632,12 +664,17 @@ function createPdfmake() {
         layout: 'lightHorizontalLines', // optional
         margin: [0, 0, 0, 20], // optional
       },
+      { text: '', pageBreak: 'before' },
       {
         table: {
           widths: [20, '*', '*'],
           body: [
-            ['Name', 'Email', 'Country'],
-            ['David', 'david@example.com', 'England'],
+            [{ text: 'Name', style: 'myCustomStyle' }, 'Email', 'Country'],
+            [
+              { text: 'DavidKun', style: 'myCustomStyle' },
+              'david@example.com',
+              'England',
+            ],
             ['John', 'john@example.com', 'USA'],
             ['Jane', 'jane@example.com', 'France'],
             ['David', 'david@example.com', 'England'],
@@ -650,14 +687,16 @@ function createPdfmake() {
             ['David', 'david@example.com', 'England'],
             ['John', 'john@example.com', 'USA'],
             ['Jane', 'jane@example.com', 'France'],
-            ['David', 'david@example.com', 'England'],
-            ['John', 'john@example.com', 'USA'],
-            ['Jane', 'jane@example.com', 'France'],
           ],
         },
         layout: 'lightHorizontalLines', // optional
       },
     ],
+    styles: {
+      myCustomStyle: {
+        fontSize: 8,
+      },
+    },
     footer: function (currentPage, pageCount) {
       return {
         text: ` ${currentPage} / ${pageCount}`,
@@ -668,6 +707,114 @@ function createPdfmake() {
 
   pdfMake.createPdf(docDefinition).download('table.pdf');
 }
+
+const seed = reactive({
+  //table에 직접 들어갈
+  data: [
+    {
+      name: 'Frozen Yogurt',
+      calories: 159,
+      fat: 6.0,
+      carbs: 24,
+      protein: 4.0,
+      sodium: 87,
+      calcium: '14%',
+      iron: '1%',
+    },
+    {
+      name: 'Ice cream sandwich',
+      calories: 237,
+      fat: 9.0,
+      carbs: 37,
+      protein: 4.3,
+      sodium: 129,
+      calcium: '8%',
+      iron: '1%',
+    },
+    {
+      name: 'Eclair',
+      calories: 262,
+      fat: 16.0,
+      carbs: 23,
+      protein: 6.0,
+      sodium: 337,
+      calcium: '6%',
+      iron: '7%',
+    },
+    {
+      name: 'Cupcake',
+      calories: 305,
+      fat: 3.7,
+      carbs: 67,
+      protein: 4.3,
+      sodium: 413,
+      calcium: '3%',
+      iron: '8%',
+    },
+    {
+      name: 'Gingerbread',
+      calories: 356,
+      fat: 16.0,
+      carbs: 49,
+      protein: 3.9,
+      sodium: 327,
+      calcium: '7%',
+      iron: '16%',
+    },
+    {
+      name: 'Jelly bean',
+      calories: 375,
+      fat: 0.0,
+      carbs: 94,
+      protein: 0.0,
+      sodium: 50,
+      calcium: '0%',
+      iron: '0%',
+    },
+    {
+      name: 'Lollipop',
+      calories: 392,
+      fat: 0.2,
+      carbs: 98,
+      protein: 0,
+      sodium: 38,
+      calcium: '0%',
+      iron: '2%',
+    },
+    {
+      name: 'Honeycomb',
+      calories: 408,
+      fat: 3.2,
+      carbs: 87,
+      protein: 6.5,
+      sodium: 562,
+      calcium: '0%',
+      iron: '45%',
+    },
+    {
+      name: 'Donut',
+      calories: 452,
+      fat: 25.0,
+      carbs: 51,
+      protein: 4.9,
+      sodium: 326,
+      calcium: '2%',
+      iron: '22%',
+    },
+    {
+      name: 'KitKat',
+      calories: 518,
+      fat: 26.0,
+      carbs: 65,
+      protein: 7,
+      sodium: 54,
+      calcium: '12%',
+      iron: '6%',
+    },
+  ],
+});
+//위 seed.data 안에 있는 데이터를 pdfmake로 그대로 뽑아내려고 하는데, 저기 데이터마다 style을 지정하고 싶으면 어떻게 가공하지?
+console.log(seed.data);
 </script>
 <style lang="sass">
 .my-sticky-header-table
