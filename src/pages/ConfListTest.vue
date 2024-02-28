@@ -634,9 +634,6 @@ function createPdfmake() {
     pageOrientation: 'landscape',
     content: [
       {
-        text: '\n\n\n', // 여기서 \n의 개수를 조절하여 테이블의 시작 위치를 조절
-      },
-      {
         text: 'title',
         alignment: 'center',
         fontSize: 25,
@@ -647,6 +644,9 @@ function createPdfmake() {
           { text: 'left', alignment: 'left', fontSize: 15 },
           { text: 'right', alignment: 'right', fontSize: 15 },
         ],
+      },
+      {
+        text: '\n\n\n', // 여기서 \n의 개수를 조절하여 테이블의 시작 위치를 조절
       },
       {
         table: {
