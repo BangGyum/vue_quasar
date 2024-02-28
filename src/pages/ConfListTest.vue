@@ -34,6 +34,7 @@
   </div>
   <q-btn round dense flat icon="send" @click="capture" />
   <q-btn round dense flat icon="send" @click="createPdf" />
+  <q-btn round dense flat icon="send" @click="createPdfmake" />
   <div class="q-mt-md">Selected: {{ JSON.stringify(selected) }}</div>
 
   <q-btn to="/confUpdate" label="To Docs index" outline color="purple" />
@@ -133,7 +134,10 @@ const doc = new jsPDF({
   format: 'a4',
 });
 
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas'; //화면캡쳐
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const lorem =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
@@ -588,6 +592,81 @@ function createPdf() {
   }
 
   doc.save('table.pdf');
+}
+function createPdfmake() {
+  const docDefinition = {
+    pageSize: 'A4',
+    pageOrientation: 'landscape',
+    content: [
+      {
+        text: 'title',
+        alignment: 'center',
+        fontSize: 20,
+        margin: [0, 20, 0, 40],
+      },
+      {
+        columns: [
+          { text: 'left', alignment: 'left', fontSize: 12 },
+          { text: 'right', alignment: 'right', fontSize: 12 },
+        ],
+      },
+      {
+        table: {
+          widths: [170, '*', '*'],
+          body: [
+            [{ text: 'Name', alignment: 'right' }, 'Email', 'Country'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+          ],
+        },
+        layout: 'lightHorizontalLines', // optional
+        margin: [0, 0, 0, 20], // optional
+      },
+      {
+        table: {
+          widths: [20, '*', '*'],
+          body: [
+            ['Name', 'Email', 'Country'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+          ],
+        },
+        layout: 'lightHorizontalLines', // optional
+      },
+    ],
+    footer: function (currentPage, pageCount) {
+      return {
+        text: ` ${currentPage} / ${pageCount}`,
+        alignment: 'center',
+      };
+    },
+  };
+
+  pdfMake.createPdf(docDefinition).download('table.pdf');
 }
 </script>
 <style lang="sass">
