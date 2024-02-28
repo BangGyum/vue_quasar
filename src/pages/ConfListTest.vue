@@ -556,8 +556,24 @@ function createPdf() {
             textColor: [0, 0, 0],
           },
         },
-        'Email',
-        'Country',
+        {
+          content: 'Email',
+          styles: {
+            halign: 'right',
+            cellWidth: 140,
+            fillColor: [255, 255, 255],
+            textColor: [0, 0, 0],
+          },
+        },
+        {
+          content: 'Country',
+          styles: {
+            halign: 'right',
+            cellWidth: 140,
+            fillColor: [255, 255, 255],
+            textColor: [0, 0, 0],
+          },
+        },
       ],
     ],
     body: [
@@ -618,6 +634,9 @@ function createPdfmake() {
     pageOrientation: 'landscape',
     content: [
       {
+        text: '\n\n\n', // 여기서 \n의 개수를 조절하여 테이블의 시작 위치를 조절
+      },
+      {
         text: 'title',
         alignment: 'center',
         fontSize: 25,
@@ -631,7 +650,7 @@ function createPdfmake() {
       },
       {
         table: {
-          widths: [170, '*', '*'],
+          widths: [130, 130, 130],
           body: [
             [
               {
@@ -640,8 +659,18 @@ function createPdfmake() {
                 fillColor: 'gray',
                 color: 'white',
               },
-              'Email',
-              'Country',
+              {
+                text: 'Email',
+                alignment: 'right',
+                fillColor: 'gray',
+                color: 'white',
+              },
+              {
+                text: 'Country',
+                alignment: 'right',
+                fillColor: 'gray',
+                color: 'white',
+              },
             ],
             [
               'David',
@@ -661,7 +690,14 @@ function createPdfmake() {
             ['Jane', 'jane@example.com', 'France'],
           ],
         },
-        layout: 'lightHorizontalLines', // optional
+        layout: {
+          hLineWidth: function (i, node) {
+            return i === 0 || i === node.table.body.length ? 0 : 0.3; //가로선 굵기
+          },
+          vLineWidth: function (i, node) {
+            return i === 0 || i === node.table.widths.length ? 0 : 0.3; //세로선 굵기
+          },
+        },
         margin: [0, 0, 0, 20], // optional
       },
       { text: '', pageBreak: 'before' },
@@ -684,6 +720,18 @@ function createPdfmake() {
             ['John', 'john@example.com', 'USA'],
             ['Jane', 'jane@example.com', 'France'],
 
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
+            ['David', 'david@example.com', 'England'],
+            ['John', 'john@example.com', 'USA'],
+            ['Jane', 'jane@example.com', 'France'],
             ['David', 'david@example.com', 'England'],
             ['John', 'john@example.com', 'USA'],
             ['Jane', 'jane@example.com', 'France'],
