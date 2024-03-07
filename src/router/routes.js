@@ -17,6 +17,10 @@ const routes = [
         path: 'confListTest',
         component: () => import('pages/ConfListTest.vue'),
       },
+      {
+        path: 'printPage',
+        component: () => import('pages/PrintPage.vue'),
+      },
     ],
   },
   {

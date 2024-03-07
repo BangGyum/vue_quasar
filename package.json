@@ -15,6 +15,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "axios": "^1.6.5",
+    "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
     "jspdf-autotable": "^3.8.2",
     "pdfmake": "^0.2.9",
