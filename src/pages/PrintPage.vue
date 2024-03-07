@@ -24,16 +24,151 @@
 <script setup>
 import _ from 'lodash';
 import { ref, shallowRef, reactive, onMounted } from 'vue';
-import apiPrint from 'src/api/print';
+//import apiPrint from 'src/api/print';
 import { saveAs } from 'file-saver';
 import Excel from 'exceljs';
 //import { useWorkStore } from "stores/work-stores";
 
 const FormulaExcel = async () => {
   const params = { wrkCode: 'W202402030000005', feedCode: '200210' };
-  const prtFeed = await apiPrint.getPrtFeed({ params });
-  let mtrl = await apiPrint.getMtrlList({ params });
-  const ntr = await apiPrint.getNtrList({ params });
+  const prtFeed = [
+    {
+      FEED_CODE: '200210',
+      FEED_NAME: '송아지',
+      TTL_PRC: '312.98                        ',
+      MXR_CPC: '125.00                        ',
+      FRS_RGS_DT: '2024-03-05',
+      FRS_RGS_ID: 'admin',
+    },
+  ]; //await apiPrint.getPrtFeed({ params });
+  let mtrl = [
+    {
+      MTRL_CODE: '001000',
+      WRK_CODE: 'W202402030000005',
+      FEED_CODE: '200210',
+      MTRL_NAME: '옥수수',
+      MXR_RT: 50.5382,
+      PRC: 250,
+      STAT: '',
+      LWR_LMTR: 0,
+      UPER_LMTR: 100,
+      MTRL_COST: 126.35,
+      CALC_MIN_VAL: 191.22,
+      CALC_MAX_VAL: 251,
+      UNT_PRC: 0,
+      SRT_ORD: 1,
+      FRS_RGS_DT: '2024-03-05',
+      FRS_RGS_ID: 'admin',
+      LST_UPD_DT: null,
+      LST_MDF_ID: null,
+      undetermined: '?',
+    },
+    {
+      MTRL_CODE: '001050',
+      WRK_CODE: 'W202402030000005',
+      FEED_CODE: '200210',
+      MTRL_NAME: '보리',
+      MXR_RT: 0,
+      PRC: 300,
+      STAT: '',
+      LWR_LMTR: 0,
+      UPER_LMTR: 30,
+      MTRL_COST: 0,
+      CALC_MIN_VAL: 233.99,
+      CALC_MAX_VAL: 0,
+      UNT_PRC: 0,
+      SRT_ORD: 3,
+      FRS_RGS_DT: '2024-03-05',
+      FRS_RGS_ID: 'admin',
+      LST_UPD_DT: null,
+      LST_MDF_ID: null,
+      undetermined: '?',
+    },
+    {
+      MTRL_CODE: '003011',
+      WRK_CODE: 'W202402030000005',
+      FEED_CODE: '200210',
+      MTRL_NAME: '대두박',
+      MXR_RT: 21.4618,
+      PRC: 450,
+      STAT: '',
+      LWR_LMTR: 0,
+      UPER_LMTR: 100,
+      MTRL_COST: 96.58,
+      CALC_MIN_VAL: 343.52,
+      CALC_MAX_VAL: 464,
+      UNT_PRC: 0,
+      SRT_ORD: 4,
+      FRS_RGS_DT: '2024-03-05',
+      FRS_RGS_ID: 'admin',
+      LST_UPD_DT: null,
+      LST_MDF_ID: null,
+      undetermined: '?',
+    },
+    {
+      MTRL_CODE: '003090',
+      WRK_CODE: 'W202402030000005',
+      FEED_CODE: '200210',
+      MTRL_NAME: '소맥피',
+      MXR_RT: 22.102,
+      PRC: 210,
+      STAT: '',
+      LWR_LMTR: 0,
+      UPER_LMTR: 30,
+      MTRL_COST: 46.41,
+      CALC_MIN_VAL: 0,
+      CALC_MAX_VAL: 219,
+      UNT_PRC: 0,
+      SRT_ORD: 5,
+      FRS_RGS_DT: '2024-03-05',
+      FRS_RGS_ID: 'admin',
+      LST_UPD_DT: null,
+      LST_MDF_ID: null,
+      undetermined: '?',
+    },
+    {
+      MTRL_CODE: '005020',
+      WRK_CODE: 'W202402030000005',
+      FEED_CODE: '200210',
+      MTRL_NAME: '당밀',
+      MXR_RT: 2,
+      PRC: 200,
+      STAT: 'min.',
+      LWR_LMTR: 2,
+      UPER_LMTR: 5,
+      MTRL_COST: 4,
+      CALC_MIN_VAL: 144.04,
+      CALC_MAX_VAL: 0,
+      UNT_PRC: 0,
+      SRT_ORD: 5,
+      FRS_RGS_DT: '2024-03-05',
+      FRS_RGS_ID: 'admin',
+      LST_UPD_DT: null,
+      LST_MDF_ID: null,
+      undetermined: '?',
+    },
+  ]; //await apiPrint.getMtrlList({ params });
+  const ntr = [
+    {
+      NTR_SEQ: '7140714',
+      WRK_CODE: 'W202402030000005',
+      FEED_CODE: '200210',
+      UNT_CD: 'Mo',
+      UNT_NAME: '(%)',
+      LVL: 12.84,
+      STAT: '',
+      LWR_LMTR: 0,
+      UPER_LMTR: 15,
+      CALC_MIN_VAL: 0,
+      CALC_MAX_VAL: 0,
+      UNT_PRC: 0,
+      SRT_ORD: 1,
+      FRS_RGS_DT: '2024-03-06',
+      FRS_RGS_ID: 'admin',
+      LST_UPD_DT: null,
+      LST_MDF_ID: null,
+    },
+  ]; //await apiPrint.getNtrList({ params });
   mtrl = mtrl.map(item => {
     //현재 배치가 없으므로 임시
     return {
