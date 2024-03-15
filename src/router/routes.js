@@ -21,6 +21,10 @@ const routes = [
         path: 'printPage',
         component: () => import('pages/PrintPage.vue'),
       },
+      {
+        path: 'functionalTest',
+        component: () => import('pages/FunctionalTest.vue'),
+      },
     ],
   },
   {
