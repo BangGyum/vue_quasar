@@ -233,16 +233,26 @@ const FormulaExcel = async () => {
   const wb = new Excel.Workbook();
 
   for (let i = 0; i < prtFeed.length; i++) {
-    //params.feedCode = prtFeed[i].FEED_CODE;
-    //let mtrl = await apiPrint.getMtrlList({ params });
-    //const ntr = await apiPrint.getNtrList({ params });
-    mtrl = mtrl.map(item => {
-      //현재 배치가 없으므로 임시
-      return {
-        ...item, // 기존의 속성
-        undetermined: '?',
-      };
+    params.feedCode = prtFeed[i].FEED_CODE;
+    //params2 = { wrkCode: "W202402030000005", feedCode: prtFeed[i].FEED_CODE };
+    let mtrl = await apiPrint.getMtrlList({ params });
+    const ntr = await apiPrint.getNtrList({ params });
+
+    let sumMXNG_RATE = 0;
+    let sumRAW_COST = 0;
+    let sumBatch = 0;
+
+    mtrl.forEach(item => {
+      sumMXNG_RATE += item.MXNG_RATE;
+      sumRAW_COST += item.RAW_COST;
+      sumBatch += item.INP_CAP;
     });
+    mtrl.unshift({
+      MXNG_RATE: sumMXNG_RATE,
+      RAW_COST: sumRAW_COST,
+      INP_CAP: sumBatch,
+    });
+
     console.log(mtrl);
     console.log(ntr);
 
@@ -274,15 +284,15 @@ const FormulaExcel = async () => {
     sheet.addRow([]);
 
     const titleNext2Row = sheet.addRow([
-      `CODE Feed : (${prtFeed[0].FEED_CODE}) ${prtFeed[0].FEED_NAME} `,
+      `CODE Feed : (${prtFeed[i].FEED_CODE}) ${prtFeed[i].FEED_NAME} `,
       '',
       '',
       '',
-      `RAW COST : ${prtFeed[0].TTL_PRC}`, //E
+      `RAW COST : ${prtFeed[i].TTL_PRC}`, //E
       '',
       '', //G
       '',
-      `Date : ${prtFeed[0].FRS_RGS_DT}`, //I
+      `Date : ${prtFeed[i].FRS_RGS_DT}`, //I
       '',
       '',
       '',
@@ -384,33 +394,31 @@ const FormulaExcel = async () => {
     mtrl.forEach(
       ({
         MTRL_CODE,
-        //      FEED_CODE,
         MTRL_NAME,
-        MXR_RT,
+        MXNG_RATE,
         PRC,
-        STAT,
+        STAT_CD,
         LWR_LMTR,
         UPER_LMTR,
-        MTRL_COST,
-        undetermined,
-        CALC_MIN_VAL,
-        CALC_MAX_VAL,
-        UNT_PRC,
+        RAW_COST,
+        INP_CAP,
+        MIN_COST,
+        MAX_COST,
+        UNT_COST,
       }) => {
         const rowDatas = [
           MTRL_CODE,
-          //      FEED_CODE,
           MTRL_NAME,
-          MXR_RT,
+          MXNG_RATE,
           PRC,
-          STAT,
+          STAT_CD,
           LWR_LMTR,
           UPER_LMTR,
-          MTRL_COST,
-          undetermined,
-          CALC_MIN_VAL,
-          CALC_MAX_VAL,
-          UNT_PRC,
+          RAW_COST,
+          INP_CAP,
+          MIN_COST,
+          MAX_COST,
+          UNT_COST,
         ];
         const appendRow = sheet.addRow(rowDatas);
 
@@ -423,25 +431,10 @@ const FormulaExcel = async () => {
             };
           }
           if (colNum === 3) {
-            cell.numFmt = '0.0000';
+            cell.numFmt = '#,##0.0000';
           }
-          if (colNum === 4) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 6) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 7) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 8) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 9) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 10) {
-            cell.numFmt = '0.00';
+          if ([4, 6, 7, 8, 9, 10].includes(colNum)) {
+            cell.numFmt = '#,##0.00';
           }
         });
       },
@@ -506,26 +499,24 @@ const FormulaExcel = async () => {
 
     ntr.forEach(
       ({
-        UNT_CD,
-        UNT_NAME,
+        NTR_NAME,
         LVL,
-        STAT,
+        STAT_CD,
         LWR_LMTR,
         UPER_LMTR,
-        CALC_MIN_VAL,
-        CALC_MAX_VAL,
-        UNT_PRC,
+        MIN_LVL,
+        MAX_LVL,
+        UNT_COST,
       }) => {
         const rowDatas = [
-          UNT_CD,
-          UNT_NAME,
+          NTR_NAME,
           LVL,
-          STAT,
+          STAT_CD,
           LWR_LMTR,
           UPER_LMTR,
-          CALC_MIN_VAL,
-          CALC_MAX_VAL,
-          UNT_PRC,
+          MIN_LVL,
+          MAX_LVL,
+          UNT_COST,
         ];
         console.log('rowDatas');
         console.log(rowDatas);
@@ -538,24 +529,17 @@ const FormulaExcel = async () => {
               color: { argb: 'ff1890ff' },
             };
           }
-          if (colNum === 3) {
-            cell.numFmt = '0.0000';
+          // if (colNum === 3) {
+          //   cell.numFmt = "0.0000";
+          // }
+          // if (colNum === 7) {
+          //   cell.numFmt = "0.00";
+          // }
+          if ([3, 5, 6].includes(colNum)) {
+            cell.numFmt = '#,##0.0000';
           }
-          if (colNum === 5) {
-            cell.numFmt = '0.0000';
-          }
-          if (colNum === 6) {
-            //bound Max
-            cell.numFmt = '0.0000';
-          }
-          if (colNum === 7) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 8) {
-            cell.numFmt = '0.00';
-          }
-          if (colNum === 9) {
-            cell.numFmt = '0.00';
+          if ([7, 8, 9].includes(colNum)) {
+            cell.numFmt = '#,##0.00';
           }
         });
       },
@@ -575,10 +559,10 @@ const FormulaExcel = async () => {
 };
 
 const RawCostExcel = async () => {
-  const params = { wrkCode: 'W202402030000005' };
-  let prtFeed = await apiPrint.getPrtFeed({ params });
+  const params = { feedCode: '' };
+  let prtFeed = await apiPrint.getBmFeed();
   prtFeed = prtFeed.map(item => {
-    const totalCost = item.MXR_CPC * item.TTL_PRC; //수량*무게
+    const totalCost = item.MNF_VLM * item.TTL_COST; //수량*무게
     return {
       ...item, // 기존의 속성
       TOTAL_COST: totalCost,
@@ -586,31 +570,31 @@ const RawCostExcel = async () => {
   });
 
   // 평균값과 합계값 계산
-  let sumTTL_PRC = 0,
-    sumMXR_CPC = 0,
+  let sumTTL_COST = 0,
+    sumMNF_VLM = 0,
     sumTOTAL_COST = 0;
   prtFeed.forEach(item => {
-    sumTTL_PRC += item.TTL_PRC;
-    sumMXR_CPC += item.MXR_CPC;
+    sumTTL_COST += item.TTL_COST;
+    sumMNF_VLM += item.MNF_VLM;
     sumTOTAL_COST += item.TOTAL_COST;
   });
-  const avgTTL_PRC = sumTTL_PRC / prtFeed.length;
-  const avgMXR_CPC = sumMXR_CPC / prtFeed.length;
+  const avgTTL_COST = sumTTL_COST / prtFeed.length;
+  const avgMNF_VLM = sumMNF_VLM / prtFeed.length;
   const avgTOTAL_COST = sumTOTAL_COST / prtFeed.length;
 
   // 평균값 데이터 추가
   prtFeed.push({
     FEED_CODE: 'AVG',
-    TTL_PRC: avgTTL_PRC,
-    MXR_CPC: avgMXR_CPC,
+    TTL_COST: avgTTL_COST,
+    MNF_VLM: avgMNF_VLM,
     TOTAL_COST: avgTOTAL_COST,
   });
 
   // 합계값 데이터 추가
   prtFeed.push({
     FEED_CODE: 'SUM',
-    TTL_PRC: sumTTL_PRC,
-    MXR_CPC: sumMXR_CPC,
+    TTL_COST: sumTTL_COST,
+    MNF_VLM: sumMNF_VLM,
     TOTAL_COST: sumTOTAL_COST,
   });
 
@@ -700,7 +684,7 @@ const RawCostExcel = async () => {
     '', //B
     '', //C
     '', //D
-    '(x1000)', //I
+    '(x1)', //I
   ];
 
   // 첫 번째 열의 첫 번째 헤더 셀과 두 번째 헤더 셀을 병합
@@ -723,15 +707,15 @@ const RawCostExcel = async () => {
     ({
       FEED_CODE,
       FEED_NAME,
-      TTL_PRC, //COST
-      MXR_CPC, //TON
+      TTL_COST, //COST
+      MNF_VLM, //TON
       TOTAL_COST,
     }) => {
       const rowDatas = [
         FEED_CODE,
         FEED_NAME,
-        TTL_PRC, //COST
-        MXR_CPC, //TON
+        TTL_COST, //COST
+        MNF_VLM, //TON
         TOTAL_COST,
       ];
       const appendRow = sheet.addRow(rowDatas);
@@ -743,14 +727,8 @@ const RawCostExcel = async () => {
             color: { argb: 'ff1890ff' },
           };
         }
-        if (colNum === 3) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 4) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 5) {
-          cell.numFmt = '0.00';
+        if ([3, 4, 5].includes(colNum)) {
+          cell.numFmt = '#,##0.00';
         }
       });
     },
@@ -779,46 +757,66 @@ const RawCostExcel = async () => {
 };
 
 const RMUsageExcel = async () => {
-  const params = { wrkCode: 'W202402030000005', feedCode: '200210' };
-  let mtrl = await apiPrint.getMtrlList({ params });
+  const params = { feedCode: '' };
 
-  // 평균값과 합계값 계산
-  let sumTTL_PRC = 0,
-    sumMXR_CPC = 0,
-    sumTOTAL_COST = 0;
-  prtFeed.forEach(item => {
-    sumTTL_PRC += item.TTL_PRC;
-    sumMXR_CPC += item.MXR_CPC;
-    sumTOTAL_COST += item.TOTAL_COST;
+  let mtrl = await apiPrint.getRmUsage({ params });
+  const getFeedSumMnfVlm = await apiPrint.getFeedSumMnfVlm({ params });
+  console.log();
+
+  let colunmCount = 0;
+  let sumAvgPrc = 0;
+  let amount = 0; //sumAvgPrc(cost전체합) * AVG_MXNG_RATE(비율)
+  let totalCost = 0; //AVG_PRC * AMOUNT
+  let sumTotalCost = 0; //
+  let costPercent = 0; //각 데이터마다 비율 들어갈 공간
+
+  let sumAvgMxngRate = 0; //100
+  let sumCostRate = 0; //100
+
+  mtrl.forEach(item => {
+    sumAvgPrc += item.AVG_PRC;
+    sumAvgMxngRate += item.AVG_MXNG_RATE;
+    colunmCount += 1;
   });
-  const avgTTL_PRC = sumTTL_PRC / prtFeed.length;
-  const avgMXR_CPC = sumMXR_CPC / prtFeed.length;
-  const avgTOTAL_COST = sumTOTAL_COST / prtFeed.length;
-
-  // 평균값 데이터 추가
-  prtFeed.push({
-    FEED_CODE: 'AVG',
-    TTL_PRC: avgTTL_PRC,
-    MXR_CPC: avgMXR_CPC,
-    TOTAL_COST: avgTOTAL_COST,
+  console.log(colunmCount);
+  mtrl = mtrl.map(item => {
+    amount = (getFeedSumMnfVlm.SUM_MNF_VLM / 100) * item.AVG_MXNG_RATE;
+    totalCost = item.AVG_PRC * amount;
+    return {
+      ...item, // 기존의 속성
+      AMOUNT: amount,
+      TOTAL_COST: totalCost,
+    };
+  });
+  console.log(mtrl);
+  mtrl.forEach(item => {
+    sumTotalCost += item.TOTAL_COST;
   });
 
+  mtrl = mtrl.map(item => {
+    costPercent = item.TOTAL_COST / sumTotalCost;
+    sumCostRate += costPercent;
+    return {
+      ...item, // 기존의 속성
+      COST_PERCENT: costPercent * 100,
+    };
+  });
+  console.log(sumAvgPrc / colunmCount);
   // 합계값 데이터 추가
-  prtFeed.push({
-    FEED_CODE: 'SUM',
-    TTL_PRC: sumTTL_PRC,
-    MXR_CPC: sumMXR_CPC,
-    TOTAL_COST: sumTOTAL_COST,
+  mtrl.push({
+    MTRL_CODE: 'SUM/AVG',
+    AVG_PRC: sumAvgPrc / colunmCount,
+    AMOUNT: getFeedSumMnfVlm.SUM_MNF_VLM,
+    AVG_MXNG_RATE: sumAvgMxngRate,
+    TOTAL_COST: sumTotalCost,
+    COST_PERCENT: sumCostRate * 100,
   });
-
-  console.log(prtFeed);
-
   const firstHeaderWidths = Array(8).fill(36); // 각 컬럼의 너비를 동일하게 설정
 
   // workbook 생성
   const wb = new Excel.Workbook();
   // sheet 생성
-  const sheet = wb.addWorksheet('wonga bogoseo');
+  const sheet = wb.addWorksheet('원료사용 sheet');
 
   sheet.addRow([
     '',
@@ -846,7 +844,7 @@ const RMUsageExcel = async () => {
     '', //C
     '', //D
     '', //E
-    `Date : ${prtFeed[0].FRS_RGS_DT}`, //F
+    `Date : ${mtrl[0].FRS_RGS_DT}`, //F
     '', //G
     '', //H
     '', //I
@@ -862,15 +860,7 @@ const RMUsageExcel = async () => {
   ]);
   sheet.addRow([]);
   sheet.mergeCells('C1:E2'); //제목 셀 병합
-
-  // sheet.mergeCells("A3:B3"); //왼쪽
-  // sheet.mergeCells("E3:F3"); //중앙
   sheet.mergeCells('F3:G3'); //오른쪽
-  //sheet.mergeCells("A3:B4");
-
-  // // 제목 스타일 지정 (선택사항)
-  // titleRow.getCell(1).font = { name: "Arial", size: 16, bold: true }; //이 줄은 제목 셀의 글꼴 스타일을 지정. 글꼴 이름을 "Arial"로, 글꼴 크기를 16으로, 그리고 볼드체로 설정
-  // titleRow.getCell(1).alignment = { vertical: "middle", horizontal: "center" }; //이 줄은 제목 셀의 정렬 방식을 지정. 수직 방향으로는 중앙에, 수평 방향으로는 가운데에 정렬하도록 설정.
 
   let cellC1 = sheet.getCell('C1');
   cellC1.font = { name: 'Arial', size: 18, bold: true };
@@ -897,7 +887,7 @@ const RMUsageExcel = async () => {
   ];
 
   const firstHeaderRow2 = sheet.getRow(6); // 두 번째 헤더 행은 첫 번째 헤더 행 바로 다음 행
-  firstHeaderRow2.values = ['', '', '', '(ton)', '', '(x1000)', ''];
+  firstHeaderRow2.values = ['', '', '', '(ton)', '', '(x1)', ''];
 
   // 첫 번째 열의 첫 번째 헤더 셀과 두 번째 헤더 셀을 병합
   sheet.mergeCells(`A5:A6`);
@@ -920,36 +910,20 @@ const RMUsageExcel = async () => {
     ({
       MTRL_CODE,
       MTRL_NAME,
-      PRC, //cost
-      //amount
-      //%
-      //total cost
-      //%
-      MXR_RT,
-
-      STAT,
-      LWR_LMTR,
-      UPER_LMTR,
-      MTRL_COST,
-      undetermined,
-      CALC_MIN_VAL,
-      CALC_MAX_VAL,
-      UNT_PRC,
+      AVG_PRC, //cost
+      AMOUNT, //amount
+      AVG_MXNG_RATE, //%
+      TOTAL_COST, //total cost
+      COST_PERCENT, //%
     }) => {
       const rowDatas = [
         MTRL_CODE,
-        //      FEED_CODE,
         MTRL_NAME,
-        MXR_RT,
-        PRC,
-        STAT,
-        LWR_LMTR,
-        UPER_LMTR,
-        MTRL_COST,
-        undetermined,
-        CALC_MIN_VAL,
-        CALC_MAX_VAL,
-        UNT_PRC,
+        AVG_PRC, //cost
+        AMOUNT, //amount
+        AVG_MXNG_RATE, //%
+        TOTAL_COST, //total cost
+        COST_PERCENT, //%
       ];
       const appendRow = sheet.addRow(rowDatas);
 
@@ -961,26 +935,23 @@ const RMUsageExcel = async () => {
             color: { argb: 'ff1890ff' },
           };
         }
-        if (colNum === 3) {
-          cell.numFmt = '0.0000';
-        }
-        if (colNum === 4) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 6) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 7) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 8) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 9) {
-          cell.numFmt = '0.00';
-        }
-        if (colNum === 10) {
-          cell.numFmt = '0.00';
+        // if (colNum === 3) {
+        //   cell.numFmt = "0.00";
+        // }
+        // if (colNum === 4) {
+        //   cell.numFmt = "0.00";
+        // }
+        // if (colNum === 5) {
+        //   cell.numFmt = "0.00";
+        // }
+        // if (colNum === 6) {
+        //   cell.numFmt = "0.00";
+        // }
+        // if (colNum === 7) {
+        //   cell.numFmt = "0.00";
+        // }
+        if ([3, 4, 5, 6, 7].includes(colNum)) {
+          cell.numFmt = '#,##0.00';
         }
       });
     },
